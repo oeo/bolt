@@ -36,13 +36,7 @@ BlockchainSchema = new mongoose.Schema({
   }
 
   mempool: [TransactionSchema]
-
   height: {type:Number,default:0},
-
-  time_last_block: {type:Number,default:0} 
-  time_last_rewardUpdate: {type:Number,default:0} 
-  time_last_difficultyUpdate: {type:Number,default:0}
-
   ctime: {type:Number,default:time()}
 
 },{versionKey:false,strict:true})
@@ -133,17 +127,10 @@ BlockchainSchema.methods.mineBlock = (rewardAddress) ->
   )
 
   await newBlock.save()
-  await Blockchain.updateOne(
-    { _id: @_id },
-    {
-      $pull: {
-        mempool: { _id: { $in: processed_mempool_items } }
-      }
-      $inc: {
-        height: 1
-      }
-    }
-  )
+
+  @.mempool = _.reject @mempool, (transaction) ->
+    transaction._id in processed_mempool_items
+  await @save()
 
 BlockchainSchema.methods.getMiningReward = (blockHeight) ->
   rewardHalvingInterval = config.rewardHalvingInterval
