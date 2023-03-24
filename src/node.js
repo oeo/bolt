@@ -8,11 +8,14 @@ const { Blockchain } = require('./lib/blockchain')
 const { Transaction } = require('./lib/transaction')
 const { Wallet } = require('./lib/wallet')
 
+// node
 async function main() {
-  const blockchain = new Blockchain(config);
+  let blockchain
 
-  while (!blockchain.chain.length) {
-    await new Promise((resolve) => setTimeout(resolve, 100));
+  try {
+    blockchain = await new Blockchain(config);
+  } catch (error) {
+    console.error('Error initializing the blockchain:', error);
   }
 
   const satoshi = new Wallet();
@@ -23,7 +26,7 @@ async function main() {
   log.debug(_.merge({ balance: await wallet2.getBalance(blockchain) }, _.pick(wallet2, ['publicKey', 'privateKey', 'address'])), 'Wallet 2');
 
   log.debug('Wallet 1 starting mining', wallet1.address);
-  await blockchain.minePendingTransactions(wallet1.address);
+  await blockchain.mineBlock(wallet1.address);
 
   log.debug(_.merge({ balance: await wallet1.getBalance(blockchain) }, _.pick(wallet1, ['publicKey', 'privateKey', 'address'])), 'Wallet 1');
   log.debug(_.merge({ balance: await wallet2.getBalance(blockchain) }, _.pick(wallet2, ['publicKey', 'privateKey', 'address'])), 'Wallet 2');
@@ -41,7 +44,7 @@ async function main() {
   wallet1.signTransaction(txn);
 
   blockchain.createTransaction(txn);
-  await blockchain.minePendingTransactions(satoshi.address);
+  await blockchain.mineBlock(satoshi.address);
 
   log.debug(_.merge({ balance: await wallet1.getBalance(blockchain) }, _.pick(wallet1, ['publicKey', 'privateKey', 'address'])), 'Wallet 1');
   log.debug(_.merge({ balance: await wallet2.getBalance(blockchain) }, _.pick(wallet2, ['publicKey', 'privateKey', 'address'])), 'Wallet 2');

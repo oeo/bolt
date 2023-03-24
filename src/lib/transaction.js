@@ -8,6 +8,7 @@ const ec = new EC('secp256k1');
 const SHA256 = require('crypto-js/sha256');
 
 class Transaction {
+
   constructor(transactionConfig) {
     this.from = transactionConfig.from;
     this.to = transactionConfig.to;
@@ -38,6 +39,21 @@ class Transaction {
     if (this.from !== null && this.fee < config.minFee) {
       throw new Error(`Transaction creation failed. Fee is below minFee: ${config.minFee}`);
     }
+  }
+
+  static fromJSON(serializedTransaction) {
+    const transactionConfig = {
+      from: serializedTransaction.from,
+      to: serializedTransaction.to,
+      amount: serializedTransaction.amount,
+      publicKey: serializedTransaction.publicKey,
+      fee: serializedTransaction.fee,
+      memo: serializedTransaction.memo,
+    };
+
+    const transaction = new Transaction(transactionConfig);
+    transaction.signature = serializedTransaction.signature;
+    return transaction;
   }
 
   calculateHash() {

@@ -1,3 +1,5 @@
+const { config } = require('./../config');
+
 const { log } = require('../utils/log');
 const { merkleHash, merkleHashStr } = require('../utils/merkleHash');
 
@@ -5,20 +7,44 @@ const _ = require('lodash')
 
 const { scrypt, scryptAsync } = require('@noble/hashes/scrypt')
 
+const { Transaction } = require('./transaction')
+
 class Block {
-  constructor(transactions, previousHash = '', config = {}) {
-    this.ctime = Math.round(new Date().getTime()/1000) 
-    this.transactions = transactions || [];
-    this.previousHash = previousHash;
-    this.nonce = 0;
-    this.difficulty = config.difficulty || config.initialDifficulty;
-    this.comment = config.comment || null;
-    this.merkleHash = merkleHashStr(this.transactions)
-    this.hash = null;
+
+  constructor(transactions, previousHash = '', opt = {}) {
+    this.ctime = opt.ctime || Math.round(new Date().getTime()/1000) 
+    this.transactions = transactions || opt.transactions || [];
+    this.previousHash = previousHash || opt.previousHash || null;
+    this.nonce = opt.nonce || 0;
+    this.difficulty = opt.difficulty || config.initialDifficulty;
+    this.comment = opt.comment || null;
+    this.merkleHash = opt.merkleHash || merkleHashStr(this.transactions)
+    this.hash = opt.hash || null;
+    this.height = opt.height || 0;
+  }
+
+  static fromJSON(serializedBlock) {
+    serializedBlock.transactions = _.map(serializedBlock.transactions,(t) => {
+      return Transaction.fromJSON(t)
+    })
+
+    return new Block(
+      serializedBlock.transactions,
+      serializedBlock.previousHash,
+      {
+        ctime: serializedBlock.ctime,
+        nonce: serializedBlock.nonce,
+        difficulty: serializedBlock.difficulty,
+        comment: serializedBlock.comment,
+        merkleHash: serializedBlock.merkleHash,
+        hash: serializedBlock.hash,
+        height: serializedBlock.height,
+      }
+    );
   }
 
   async init() {
-    return this;
+    return this
   }
 
   renderBlock(includeHash = true) {
@@ -35,6 +61,8 @@ class Block {
     if (includeHash) {
       b.hash = this.hash
     }
+
+    b.height = this.height
 
     return b
   }
@@ -89,10 +117,16 @@ class Block {
     return transactionData;
   }
 
+  // returns difficulty if valid, throws if hash mismatch
+  async verifyWork() {
+    let buff = await this.calculateHash()
+    console.log(/buff/,buff)
+  }
+
 }
 
-const createBlock = async (transactions, previousHash, config) => {
-  const block = new Block(transactions, previousHash, config);
+const createBlock = async (transactions, previousHash, opt = {}) => {
+  const block = new Block(transactions, previousHash, opt);
   return await block.init();
 };
 

@@ -65,22 +65,9 @@ class Wallet {
     return wallet;
   }
 
-  getBalance(blockchain) {
-    let balance = 0;
-
-    for (const block of blockchain.chain) {
-      for (const transaction of block.transactions) {
-        if (transaction.from === this.address) {
-          balance -= transaction.amount + transaction.fee;
-        }
-
-        if (transaction.to === this.address) {
-          balance += transaction.amount;
-        }
-      }
-    }
-
-    return balance;
+  async getBalance(blockchain) {
+    let balance =  await blockchain.getBalanceOfAddress(this.address)
+    return balance
   }
 }
 
