@@ -1,27 +1,20 @@
 config = require './config'
 
-_ = require 'lodash'
+mongoose = require 'mongoose'
+await mongoose.connect config.storage.mongo
 
-Block = require './models/block'
+Wallet = require './lib/wallet'
+Blockchain = require './models/blockchain'
 
-genesisBlock = new Block(_.clone config.genesisBlock)
-log /block/, genesisBlock
+# find blockchain
+blockchain = await Blockchain.connect()
 
-hash = await genesisBlock.calculateHash()
-log /block-hash/, hash
+# create new wallet
+wallet = new Wallet('privatekeyhere')
+wallet.use(blockchain)
 
-solved = await genesisBlock.mine()
-
-log /solved/, solved 
-log /current object after solve/, genesisBlock
-
-log /validating block hash/
-
-valid = await genesisBlock.validateHash(solved)
-log /valid/, valid
-
-log /final block/
-log genesisBlock
-
-##valid = await genesisBlock.validate()
-##log /valid/, valid
+# mine
+while 1
+  if solved = await blockchain.mineBlock(wallet.address)
+    log 'Mined a block', solved
+    log 'Wallet balance:', await wallet.getBalance()

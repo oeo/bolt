@@ -65,16 +65,10 @@ BlockchainSchema.methods.createGenesisBlock = ->
     await b.save()
 
 BlockchainSchema.methods.mineBlock = (rewardAddress) ->
-  fees = 0
-
   realDoc = await Blockchain.findOne({_id:@_id}).lean()
   height = realDoc.height
   mempool = realDoc.mempool
 
-  for transaction in mempool
-    fees += transaction.fee if transaction.fee?
-  
-  # Create reward transaction
   rewardTransaction = new Transaction {
     to: rewardAddress 
     amount: @miningReward + fees
@@ -90,11 +84,14 @@ BlockchainSchema.methods.mineBlock = (rewardAddress) ->
   blockTransactions = []
   blockSize = JSON.stringify(rewardTransaction).length
 
+  fees = 0
+
   # Add transactions to the block until maxBlockSize or maxTransactionsPerBlock is reached
   for transaction in mempoolSorted 
     transactionSize = JSON.stringify(transaction).length
 
     if blockSize + transactionSize <= config.maxBlockSize and blockTransactions.length < config.maxTransactionsPerBlock
+      fees += transaction.fee if transaction.fee?
       blockTransactions.push(transaction)
       blockSize += transactionSize
     else
@@ -114,25 +111,27 @@ BlockchainSchema.methods.mineBlock = (rewardAddress) ->
     difficulty: @difficulty 
   })
 
+  log 'Mining a block with ' + (blockTransactions.length - 1) + ' transactions'
+
   solved = await newBlock.mineBlock()
 
-  processed_txn_ids = (_.compact _.map @mempool, (x) ->
+  processed_txn_ids = (_.compact _.map mempool, (x) ->
     if x in blockTransactions then return x._id 
     return null
   )
 
-  await Blockchain.updateOne({_id:@_id},{
-    $pull:{
-      mempool:{
-        _id: {
-          $in: processed_txn_ids
-        }
-      }
+  await Blockchain.updateOne(
+    { _id: @_id },
+    {
+      $pull: {
+        mempool: { _id: { $in: processed_txn_ids } }
+      },
+      $inc: { height: 1 }
     }
-    $inc: {height:1}
-  })
+  )
 
   await newBlock.save()
+  return newBlock.toJSON()
 
 # half mining reward
 BlockchainSchema.methods.updateMiningReward = ->
@@ -202,5 +201,18 @@ BlockchainSchema.methods.addTransaction = (transactionObj,wallet) ->
     await Blockchain.updateOne({_id:@_id},{$addToSet:{mempool:txn}})
     log 'Transaction added to mempool', txn
 
+BlockchainSchema.statics.connect = ->
+  blockchain = await Blockchain.findOne {default:true}
+
+  if !blockchain
+    blockchain = new Blockchain()
+    blockchain.save()
+  else
+    log blockchain.toJSON()
+    await blockchain.createGenesisBlock()
+  
+  return blockchain
+
 Blockchain = mongoose.model 'Blockchain', BlockchainSchema 
+
 module.exports = Blockchain 
