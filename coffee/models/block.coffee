@@ -5,7 +5,7 @@ mongoose = require 'mongoose'
 {Transaction,TransactionSchema} = require './transaction'
 
 merkle = require './../lib/merkle'
-{timeBucket,sha256} = require './../lib/helpers'
+{time,timeBucket,sha256} = require './../lib/helpers'
 
 {scryptAsync} = require('@noble/hashes/scrypt')
 
@@ -48,7 +48,7 @@ BlockSchema = new mongoose.Schema({
 
   ctime: {
     type: Number
-    default: -> timeBucket(10)
+    default: -> time() 
   }
 
   difficulty: {
@@ -63,14 +63,13 @@ BlockSchema = new mongoose.Schema({
     required: true
   }
 
-}, {id:false,versionKey:false,strict:true})
+}, {versionKey:false,strict:true})
 
 maxTarget = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF')
 getTargetForDifficulty = (difficulty) -> maxTarget / BigInt(difficulty)
 
 BlockSchema.pre 'save', (next) ->
-  count = await Block.count {version:@version}
-  @_id = count
+  @_id = await Block.count({}).lean() 
   next()
 
 # calculate block hash 
@@ -110,7 +109,7 @@ BlockSchema.methods.mineBlock = (->
     {hashBuf, hashBigInt} = await @calculateHash()
     if hashBigInt < target
       @hash = Buffer.from(hashBuf).toString('hex')
-      log 'Solved block', @toJSON(), @hash 
+      log 'Solved block', @toJSON() 
       return @hash
     else
       @nonce = @nonce + 1

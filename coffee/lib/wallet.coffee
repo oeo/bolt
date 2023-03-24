@@ -49,14 +49,22 @@ class Wallet
     wallet.address = wallet.createAddress()
     return wallet
 
-  use: (blockchain) ->
-    @_blockchain = blockchain
+  use: (blockchain) -> @_blockchain = blockchain
 
-  getBalance: ->
+  getBalance: (includeMempool=false) ->
     if !@_blockchain
       throw new Error 'Not connected to a chain, use `wallet.use(blockchain)`'
 
     balance = await @_blockchain.getBalance(@address)
-    return balance
+
+    if !includeMempool
+      return balance
+    else
+      return {
+        onChain: balance
+        mempoolCredit: await @_blockchain.getMempoolCredit(@address)
+        mempoolDebt: await @_blockchain.getMempoolDebt(@address)
+      }
+
 
 module.exports = Wallet

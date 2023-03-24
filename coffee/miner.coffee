@@ -1,5 +1,7 @@
 config = require './config'
 
+log 'Miner started'
+
 mongoose = require 'mongoose'
 await mongoose.connect config.storage.mongo
 

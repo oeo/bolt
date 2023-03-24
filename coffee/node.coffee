@@ -21,9 +21,10 @@ wallets = {
 wallets.doug.use(blockchain)
 wallets.john.use(blockchain)
 
-#await blockchain.mineBlock(wallets.doug.address)
+log await wallets.doug.getBalance()
+log await wallets.john.getBalance()
 
-log /doug balance/, await wallets.doug.getBalance()
+#await blockchain.mineBlock(wallets.doug.address)
 
 ## add txns to mempool
 await blockchain.addTransaction({

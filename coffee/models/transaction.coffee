@@ -9,11 +9,20 @@ ec = new EC('secp256k1')
 
 TransactionSchema = new mongoose.Schema({
 
-  _id: {type:String,default:->uuid()} 
+  _id: {
+    type: String
+    default: -> uuid()
+  }
+
   from: {type:String} 
   to: {type:String,required:true}
 
-  fee: {type:Number,default:0}
+  fee: {
+    type: Number
+    default: config.minFee
+    min: config.minFee
+  }
+
   amount: {type:Number,default:0}
 
   comment: {

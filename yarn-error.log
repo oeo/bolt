@@ -1,5 +1,5 @@
 Arguments: 
-  /Users/taky/.nvm/versions/node/v19.7.0/bin/node /Users/taky/.nvm/versions/node/v19.7.0/bin/yarn add short-uuid
+  /Users/taky/.nvm/versions/node/v19.7.0/bin/node /Users/taky/.nvm/versions/node/v19.7.0/bin/yarn remove mongoose-auto-increment
 
 PATH: 
   /Users/taky/.nvm/versions/node/v19.7.0/bin:/Library/Frameworks/Python.framework/Versions/2.7/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin
@@ -41,7 +41,6 @@ npm manifest:
       "moment": "^2.29.4",
       "monero-javascript": "^0.7.7",
       "mongoose": "^7.0.3",
-      "mongoose-auto-increment": "^5.0.1",
       "mongoose-sequence": "^5.3.1",
       "pino": "^8.11.0",
       "redis": "^4.6.5",

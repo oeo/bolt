@@ -5,7 +5,7 @@ mongoose = require 'mongoose'
 Block = require './block'
 {Transaction,TransactionSchema} = require './transaction'
 
-{timeBucket,sha256} = require './../lib/helpers'
+{time,timeBucket,sha256} = require './../lib/helpers'
 
 BlockchainSchema = new mongoose.Schema({
 
@@ -43,124 +43,183 @@ BlockchainSchema = new mongoose.Schema({
   time_last_rewardUpdate: {type:Number,default:0} 
   time_last_difficultyUpdate: {type:Number,default:0}
 
-  ctime: {type:Number,default:timeBucket(60)}
+  ctime: {type:Number,default:time()}
 
 },{versionKey:false,strict:true})
 
 BlockchainSchema.pre 'save', (next) ->
   if @isNew
     log 'Created new Blockchain', @toJSON()
-
-  await @createGenesisBlock()
+    await @createGenesisBlock()
 
   next()
 
 BlockchainSchema.methods.createGenesisBlock = ->
-  exists = await Block.findOne _id:0
+  block = await Block.findOne({}).sort({ _id: -1 }).limit(1)
 
-  if !exists
+  if not block
     b = new Block(_.clone config.genesisBlock)
     log 'Mining Genesis block'
     await b.mineBlock()
     await b.save()
 
 BlockchainSchema.methods.mineBlock = (rewardAddress) ->
-  realDoc = await Blockchain.findOne({_id:@_id}).lean()
-  height = realDoc.height
-  mempool = realDoc.mempool
+  realDoc = await Block.findOne({}).sort({ _id: -1 }).limit(1)
+  height = realDoc._id
 
-  rewardTransaction = new Transaction {
+  # sort mempool by best fees
+  mempoolSorted = _.sortBy @mempool, (a,b) -> 
+    (a.fee ? 0 > b.fee ? 0) 
+
+  # calculate reward and difficulty for block
+  calculatedReward = @getMiningReward(height)
+  calculatedDifficulty = await @getCurrentDifficulty(height)
+
+  changes = {}
+
+  if calculatedReward isnt @miningReward
+    @miningReward = calculatedReward
+    await @save()
+
+  if calculatedDifficulty isnt @difficulty
+    @difficulty = calculatedDifficulty
+    await @save()
+
+  blockTransactions = []
+
+  rewardTransaction = { 
     to: rewardAddress 
-    amount: @miningReward + fees
-    comment: 'BLOCK_MINING_REWARD'
+    amount: calculatedReward
+    comment: 'BLOCK_REWARD'
   }
 
-  rewardTransaction = rewardTransaction.toJSON()
-
-  # Sort pending transactions based on their fees in descending order
-  mempoolSorted = _.sortBy mempool, (a,b) -> (a.fee ? 0 > b.fee ? 0) 
-
-  # Initialize block transactions and size
-  blockTransactions = []
   blockSize = JSON.stringify(rewardTransaction).length
 
   fees = 0
-
-  # Add transactions to the block until maxBlockSize or maxTransactionsPerBlock is reached
   for transaction in mempoolSorted 
     transactionSize = JSON.stringify(transaction).length
 
     if blockSize + transactionSize <= config.maxBlockSize and blockTransactions.length < config.maxTransactionsPerBlock
       fees += transaction.fee if transaction.fee?
+
       blockTransactions.push(transaction)
       blockSize += transactionSize
     else
       break
 
-  # add reward txn to the end
+  rewardTransaction = new Transaction(rewardTransaction)
+  rewardTransaction.amount += fees
+
+  rewardTransaction = rewardTransaction.toJSON()
   blockTransactions.push(rewardTransaction)
-
-  # determine correct difficulty
-  # await @adjustDifficulty()
-
-  lastBlock = await Block.findOne _id:height 
 
   newBlock = new Block({
     txns: (_.map blockTransactions, (x) -> x)
-    hash_previous: lastBlock.hash
-    difficulty: @difficulty 
+    hash_previous: realDoc?.hash ? config.genesisBlock.hash
+    difficulty: calculatedDifficulty
   })
 
-  log 'Mining a block with ' + (blockTransactions.length - 1) + ' transactions'
+  log 'Mining a block', {
+    transactions: blockTransactions.length
+    reward: calculatedReward
+    difficulty: calculatedDifficulty
+  }
 
-  solved = await newBlock.mineBlock()
-
-  processed_txn_ids = (_.compact _.map mempool, (x) ->
+  await newBlock.mineBlock()
+  
+  processed_mempool_items = (_.compact _.map @mempool, (x) ->
     if x in blockTransactions then return x._id 
     return null
   )
 
+  await newBlock.save()
   await Blockchain.updateOne(
     { _id: @_id },
     {
       $pull: {
-        mempool: { _id: { $in: processed_txn_ids } }
-      },
-      $inc: { height: 1 }
+        mempool: { _id: { $in: processed_mempool_items } }
+      }
+      $inc: {
+        height: 1
+      }
     }
   )
 
-  await newBlock.save()
-  return newBlock.toJSON()
+BlockchainSchema.methods.getMiningReward = (blockHeight) ->
+  rewardHalvingInterval = config.rewardHalvingInterval
+  halvings = _.floor(blockHeight / rewardHalvingInterval)
+  reward = config.initialReward / (2 ** halvings)
+  return reward
 
-# half mining reward
-BlockchainSchema.methods.updateMiningReward = ->
-  @reward /= 2
-  @time_last_rewardUpdate = timeBucket(60) 
-  return @save
+BlockchainSchema.methods.getCurrentMiningReward = ->
+  return @getMiningReward(@height)
 
-# update difficulty if needed 
-BlockchainSchema.methods.updateDifficulty = ->
-  chainLength = @height
+BlockchainSchema.methods.getCurrentDifficulty = (chainLength) ->
+  adjustmentInterval = config.difficultyAdjustmentInterval
 
-  if (chainLength - 1) % config.difficultyAdjustmentInterval == 0 && chainLength > 1
-    startIndex = chainLength - 1 - config.difficultyAdjustmentInterval
-    startTime = @chain[startIndex].ctime
-    endTime = @chain[chainLength - 1].ctime
+  if chainLength % adjustmentInterval isnt 0 or chainLength is 0
+    return @difficulty
 
-    timeElapsed = endTime - startTime
-    targetTime = config.difficultyAdjustmentInterval * config.blockInterval
+  blocks = await Block
+    .find({}, ctime: 1)
+    .sort(_id: -1)
+    .limit(adjustmentInterval)
+    .lean()
 
-    if timeElapsed < targetTime * 0.9
-      log 'Increasing difficulty'
-      @difficulty *= 2
-    else if timeElapsed > targetTime * 1.1
-      log 'Decreasing difficulty'
-      @difficulty /= 2
+  firstBlock = blocks[blocks.length - 1]
+  lastBlock = blocks[0]
 
-    @time_last_difficultyUpdate = timeBucket(60)
+  elapsedTime = (lastBlock.ctime - firstBlock.ctime) / 1000
+  targetTime = adjustmentInterval * config.blockInterval
 
-  return @save
+  actualTime = elapsedTime
+  expectedTime = targetTime
+
+  difficultyRatio = actualTime / expectedTime
+  maxRatio = 4
+  minRatio = 0.25
+
+  newDifficulty = @difficulty
+  if difficultyRatio < minRatio
+    newDifficulty = _.ceil(@difficulty / minRatio)
+  else if difficultyRatio > maxRatio
+    newDifficulty = _.floor(@difficulty / (difficultyRatio / maxRatio))
+  else
+    newDifficulty = _.floor(@difficulty * difficultyRatio)
+
+  return newDifficulty
+
+BlockchainSchema.methods.xgetCurrentDifficulty = ->
+  realDoc = await Block.findOne({}).sort({ _id: -1 }).lean().limit(1)
+  chainLength = realDoc._id
+
+  adjustmentInterval = config.difficultyAdjustmentInterval
+  
+  if chainLength % adjustmentInterval isnt 0 or chainLength is 0
+    return @difficulty
+  
+  blocks = await Block
+    .find({}, {hash_merkle: 1, ctime: 1})
+    .sort({_id: -1})
+    .limit(adjustmentInterval)
+    .lean()
+  
+  firstBlock = _.last(blocks)
+  lastBlock = _.first(blocks)
+  
+  elapsedTime = (lastBlock.ctime - firstBlock.ctime) / 1000
+  targetTime = adjustmentInterval * config.blockInterval
+  
+  actualTime = _.sumBy(blocks, 'ctime') / 1000
+  expectedTime = targetTime * adjustmentInterval
+  
+  difficultyRatio = actualTime / expectedTime
+  maxRatio = 4
+  
+  if difficultyRatio > maxRatio
+    return _.floor(@difficulty / (difficultyRatio / maxRatio))
+  
+  return _.floor(@difficulty * difficultyRatio)
 
 BlockchainSchema.methods.getBalance = (address) ->
   blocks = await Block.find({
@@ -185,17 +244,33 @@ BlockchainSchema.methods.getBalance = (address) ->
       if txn.to is address
         balance += txn.amount
       if txn.from is address
-        balance -= txn.amount - txn.fees
+        balance -= (txn.amount + (txn.fee ? 0))
 
   return balance
 
-# add transaction to mempool
+BlockchainSchema.methods.getMempoolDebt = (address) ->
+  amount = 0
+  for txn in @mempool
+    if txn.from is address
+      amount += (txn.amount + txn.fee)
+  return amount 
+
+BlockchainSchema.methods.getMempoolCredit = (address) ->
+  amount = 0
+  for txn in @mempool
+    if txn.to is address
+      amount += (txn.amount)
+  return amount 
+
 BlockchainSchema.methods.addTransaction = (transactionObj,wallet) ->
   txn = new Transaction(transactionObj) 
   txn = wallet.signTransaction(txn)
 
-  log /adding txn/, txn
-  log /mempool/, @mempool
+  balance = await @getBalance(wallet.address)
+  balance -= await @getMempoolDebt(wallet.address)
+
+  if balance < (txn.amount + txn.fee)
+    throw new Error 'Insufficient balance', balance
 
   if txn.isValid()
     await Blockchain.updateOne({_id:@_id},{$addToSet:{mempool:txn}})
@@ -206,13 +281,11 @@ BlockchainSchema.statics.connect = ->
 
   if !blockchain
     blockchain = new Blockchain()
-    blockchain.save()
+    await blockchain.save()
   else
-    log blockchain.toJSON()
     await blockchain.createGenesisBlock()
-  
+
   return blockchain
 
 Blockchain = mongoose.model 'Blockchain', BlockchainSchema 
-
 module.exports = Blockchain 
