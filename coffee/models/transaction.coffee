@@ -1,6 +1,6 @@
 config = require './../config'
 
-{timeBucket,sha256,uuid} = require './../lib/helpers'
+{timeBucket, sha256, uuid, time} = require './../lib/helpers'
 
 mongoose = require 'mongoose'
 
@@ -11,7 +11,7 @@ TransactionSchema = new mongoose.Schema({
 
   _id: {
     type: String
-    default: -> uuid()
+    default: -> @calculateHash()
   }
 
   from: {type:String} 
@@ -33,6 +33,11 @@ TransactionSchema = new mongoose.Schema({
 
   publicKey: {type:String}
   signature: {type:String}
+
+  ctime: {
+    type: Number
+    default: -> time()
+  }
 
 }, {versionKey:false})
 
@@ -59,4 +64,4 @@ TransactionSchema.methods.isValid = ->
   return keyPair.verify(@calculateHash(), @signature)
 
 Transaction = mongoose.model 'Transaction', TransactionSchema
-module.exports = {Transaction,TransactionSchema}
+module.exports = {Transaction, TransactionSchema}

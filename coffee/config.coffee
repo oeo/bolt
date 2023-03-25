@@ -21,7 +21,7 @@ config = {
     comment: 'genesis'
   }
   storage: {
-    mongo: 'mongodb://127.0.0.1:27017/test9999'
+    mongo: 'mongodb://127.0.0.1:27017/test9991'
   }
 }
 

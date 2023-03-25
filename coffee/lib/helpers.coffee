@@ -2,6 +2,7 @@ crypto = require 'crypto'
 uuid = (require 'short-uuid').generate
 
 time = -> Math.floor(Date.now() / 1000) 
+
 timeBucket = (seconds) ->
   now = Math.floor(Date.now() / 1000)  # Get the current Unix epoch time in seconds
   bucketSize = seconds  # Set the bucket size to 60 seconds
@@ -19,4 +20,3 @@ module.exports = {
   uuid,
   time,
 }
-

@@ -53,7 +53,6 @@ BlockchainSchema.methods.createGenesisBlock = ->
 
   if not block
     b = new Block(_.clone config.genesisBlock)
-    log 'Mining Genesis block'
     await b.mineBlock()
     await b.save()
 
@@ -113,7 +112,8 @@ BlockchainSchema.methods.mineBlock = (rewardAddress) ->
     difficulty: calculatedDifficulty
   })
 
-  log 'Mining a block', {
+  log 'Mining a block', obj = {
+    height: (realDoc?._id ? 0) + 1,
     transactions: blockTransactions.length
     reward: calculatedReward
     difficulty: calculatedDifficulty
@@ -130,6 +130,9 @@ BlockchainSchema.methods.mineBlock = (rewardAddress) ->
 
   @.mempool = _.reject @mempool, (transaction) ->
     transaction._id in processed_mempool_items
+
+  @height = obj.height 
+
   await @save()
 
 BlockchainSchema.methods.getMiningReward = (blockHeight) ->
