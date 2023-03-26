@@ -5,23 +5,20 @@ util = require 'util'
 crypto = require 'crypto'
 readline = require 'readline'
 
-time = (divis = false) -> 
-  num = 1000
-  if divis = 'ms' then num = 1 
-  Math.floor(Date.now() / num) 
+time = -> _.floor(new Date().getTime() / 1000) 
 
 timeBucket = (seconds) ->
-  now = Math.floor(Date.now() / 1000)  # Get the current Unix epoch time in seconds
-  bucketSize = seconds  # Set the bucket size to 60 seconds
-
-  bucket = Math.floor(now / bucketSize) * bucketSize  # Calculate the current time bucket
-
+  now = Math.floor(new Date().getTime() / 1000)
+  bucketSize = seconds
+  bucket = Math.floor(now / bucketSize) * bucketSize
   return bucket
 
 sha256 = (val) ->
-  return crypto.createHash('sha256').update(val).digest('hex')
+  crypto.createHash('sha256')
+    .update(val)
+    .digest('hex')
 
-_confirm = (question,defaultResponse='Y',cb) ->
+_confirm = (question, defaultResponse='Y', cb) ->
   rl = readline.createInterface process.stdin, process.stdout
 
   if typeof(defaultResponse) is 'string'
@@ -76,6 +73,85 @@ prettyLog = (prefix,x...) ->
     x2.push item
   log(prefix.yellow,...x2)
 
+median = (numbers) ->
+  if !numbers? or numbers.length == 0
+    throw new Error("Input array must be non-empty")
+
+  if numbers.length is 1 then return _.first(numbers)
+
+  # Sort the numbers in ascending order
+  sortedNumbers = numbers.slice().sort (a, b) -> a - b
+
+  # Calculate the middle index of the sorted array
+  middleIndex = Math.floor(sortedNumbers.length / 2)
+
+  # If the length of the array is even, return the average of the two middle elements
+  # Otherwise, return the middle element
+  result =
+    if sortedNumbers.length % 2 == 0
+      (sortedNumbers[middleIndex - 1] + sortedNumbers[middleIndex]) / 2
+    else
+      sortedNumbers[middleIndex]
+
+  return result 
+
+calculateBlockReward = (blockHeight = 0) ->
+  rewardHalvingInterval = config.rewardHalvingInterval
+  halvings = _.floor(blockHeight / rewardHalvingInterval)
+  reward = config.rewardDefault / (2 ** halvings)
+  return reward
+
+calculateBlockDifficulty = (blockchainId, blockHeight = 0) ->
+  Block = require './../models/block'
+
+  query = {
+    blockchain: blockchainId 
+  }
+
+  if blockHeight
+    query['_id'] = {
+      $lte: blockHeight
+    }
+
+  diffBlocks = await Block 
+    .find(query,{ctime:1,time_elapsed:1,difficulty:1})
+    .sort(_id:-1)
+    .limit(config.difficultyChangeBlockConsideration)
+    .lean()
+
+  if !diffBlocks.length
+    return config.difficultyDefault
+
+  currentDifficulty = _.first(diffBlocks)?.difficulty ? config.difficultyDefault
+
+  averageElapsed = _.map diffBlocks, (x) -> x.time_elapsed
+  averageElapsed = _.ceil median averageElapsed
+
+  if currentDifficulty < config.difficultyDefault
+    currentDifficulty = config.difficultyDefault
+
+  drastic = false
+
+  if averageElapsed < config.blockInterval
+    if averageElapsed < config.blockInterval / 2
+      drastic = true
+
+    if drastic
+      currentDifficulty += (currentDifficulty * (config.difficultyChangePercentDrastic/100))
+    else
+      currentDifficulty += (currentDifficulty * (config.difficultyChangePercent/100))
+  
+  if averageElapsed > config.blockInterval
+    if averageElapsed > config.blockInterval * 2
+      drastic = true
+
+    if drastic
+      currentDifficulty -= (currentDifficulty * (config.difficultyChangePercentDrastic/100))
+    else
+      currentDifficulty -= (currentDifficulty * (config.difficultyChangePercent/100))
+
+  return _.ceil(currentDifficulty)
+
 module.exports = {
   time,
   timeBucket,
@@ -84,4 +160,7 @@ module.exports = {
   isObject,
   indentedJSON,
   prettyLog,
+  median,
+  calculateBlockReward,
+  calculateBlockDifficulty,
 }

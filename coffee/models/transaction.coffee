@@ -20,7 +20,11 @@ TransactionSchema = new mongoose.Schema({
   fee: {
     type: Number
     default: config.minFee
-    min: config.minFee
+    validate: {
+      validator: (val) ->
+        if !this.from then return true 
+        if val < config.minFee then return false
+    }
   }
 
   amount: {type:Number,default:0}
@@ -51,11 +55,6 @@ TransactionSchema.methods.calculateHash = ->
   ].join('')) 
 
 TransactionSchema.methods.isValid = ->
-  if !@from then return true 
-
-  if !@signature
-    throw new Error 'No signature found on transaction'
-
   keyPair = ec.keyFromPublic(@publicKey, 'hex')
 
   if !keyPair

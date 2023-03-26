@@ -9,25 +9,25 @@ Blockchain = require './../models/blockchain'
 
 Wallet = require './../lib/wallet'
 
-# connect or create chain 
 blockchain = new Blockchain()
-await blockchain.init()
+await blockchain.sync()
 
-# create some wallets
-wallets = {
-  doug: new Wallet('privatekeyhere')
-  john: new Wallet('9dcc0ab7e6c07633c2dea51a12c1095fd10dc3dadddd2e9df2283d22deb73371')
-}
+walletJSON = require('fs').readFileSync('./../data/test-wallets.json')
+walletJSON = JSON.parse(walletJSON)
 
-wallets.doug.use(blockchain)
-wallets.john.use(blockchain)
+wallets = {}
 
-log await wallets.doug.getBalance()
-log await wallets.john.getBalance()
+for item in walletJSON
+  wallets[item.name] = new Wallet(item.mnemonic)
+  wallets[item.name].use(blockchain)
 
-#await blockchain.mineBlock(wallets.doug.address)
+log 'Created wallets', _.keys(wallets)
+
+log 'Mining a block using wallet "taky"'
+await blockchain.mineBlock(wallets.taky.address)
 
 ## add txns to mempool
+###
 await blockchain.addTransaction({
   from: wallets.doug.address,
   to: wallets.john.address,
@@ -42,4 +42,4 @@ await blockchain.addTransaction({
   fee: 0.5,
   comment: 'highest prio' 
 }, wallets.doug)
-
+###

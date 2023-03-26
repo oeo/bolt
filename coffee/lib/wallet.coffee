@@ -75,6 +75,7 @@ class Wallet
 
 module.exports = Wallet
 
+## test
 if !module.parent 
 
   # Create a wallet with null (generate a new wallet)
