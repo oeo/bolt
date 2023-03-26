@@ -184,31 +184,6 @@ BlockSchema.methods.xmine = (->
   return _mine()
 )
 
-BlockSchema.methods.xmine = ->
-  miningCanceled = false
-
-  # Set up the event listener
-  eve.once 'block_solved', (data) =>
-    log /i got block_solved/, data
-    miningCanceled = true
-
-  # Convert the recursive mining function to a while loop
-  _mine = =>
-    target = getTargetForDifficulty(@difficulty)
-
-    while not miningCanceled
-      {hashBuf, hashBigInt} = await @calculateHash()
-
-      if hashBigInt < target
-        @hash = Buffer.from(hashBuf).toString('hex')
-        return @hash
-      else
-        @nonce = @nonce + 1
-
-    return null
-
-  return _mine()
-
 BlockSchema.methods.mine = ->
   miningCanceled = false
 

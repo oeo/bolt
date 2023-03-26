@@ -1,9 +1,7 @@
-config = require './../config'
+config = require './globals'
 
 util = require 'util'
-
 crypto = require 'crypto'
-readline = require 'readline'
 
 time = -> _.floor(new Date().getTime() / 1000) 
 
@@ -19,6 +17,7 @@ sha256 = (val) ->
     .digest('hex')
 
 _confirm = (question, defaultResponse='Y', cb) ->
+  readline = require 'readline'
   rl = readline.createInterface process.stdin, process.stdout
 
   if typeof(defaultResponse) is 'string'

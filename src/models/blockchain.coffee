@@ -1,11 +1,7 @@
 config = require './../config'
 
-mongoose = require 'mongoose'
-
 Block = require './block'
 {Transaction,TransactionSchema} = require './transaction'
-
-P2P = require './../lib/p2p'
 
 {
   median,
@@ -141,6 +137,46 @@ BlockchainSchema.methods.nextBlock = (minerWallet) ->
     newBlock = new Block(genesis)
 
   return newBlock
+
+BlockchainSchema.methods.query = (x...) ->
+  await db.Blocks.find(x...)
+
+BlockchainSchema.methods.addressBalance = (address,includeMempool=false) ->
+  items = await Block.find({
+    blockchain: @_id
+    $or: [
+      { 'transactions.to': address }
+      { 'transactions.from': address }
+    ]
+  },{transactions:1}).sort({_id:1})
+
+  balance = 0
+
+  for x in items
+    for t in x.transactions
+      if t.to is address
+        balance += t.amount
+      if t.from is address
+        balance -= (t.amount - t.fee)
+
+  if !includeMempool then return balance
+
+  result = {}
+  result.onChain = balance
+  result.mempoolCredit = 0
+  result.mempoolDebt = 0
+  
+  for t in @mempool
+    if t.to is address
+      result.mempoolCredit += t.amount
+    if t.from is address
+      result.mempoolDebt -= (t.amount - t.fee)
+
+  result.balanceCalculated = 
+    (result.onChain + result.mempoolCredit - result.mempoolDebt)
+
+  return result
+
 
 ##
 Blockchain = mongoose.model 'Blockchain', BlockchainSchema 
