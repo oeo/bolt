@@ -11,8 +11,12 @@ merkle = require './../lib/merkle'
 
 BlockSchema = new mongoose.Schema({
 
-  _id: {
-    type: Number
+  _id: Number
+
+  blockchain: {
+    type: String
+    ref: 'Blockchain'
+    default: config.version
   }
 
   txns: {
@@ -22,11 +26,6 @@ BlockSchema = new mongoose.Schema({
   comment: {
     type: String
     default: null
-  }
-
-  version: {
-    type: String 
-    default: config.version
   }
 
   hash: {
@@ -68,14 +67,18 @@ BlockSchema = new mongoose.Schema({
 maxTarget = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF')
 getTargetForDifficulty = (difficulty) -> maxTarget / BigInt(difficulty)
 
+# determine my own block id
 BlockSchema.pre 'save', (next) ->
-  @_id = await Block.count({}).lean() 
+  @_id = await Block.count({
+    blockchain: @blockchain
+  }).lean() 
+
   next()
 
 # calculate block hash 
 BlockSchema.methods.calculateHash = (returnString = false) ->
   str = [
-    "#{@version}"
+    "#{@blockchain}"
     "#{@hash_previous}"
     "#{@hash_merkle}"
     "#{@ctime}"
@@ -92,7 +95,7 @@ BlockSchema.methods.calculateHash = (returnString = false) ->
     return {hashBuf, hashBigInt}
 
 # validate this block hash is correct
-BlockSchema.methods.validateHash = ->
+BlockSchema.methods.verifyHash = ->
   target = getTargetForDifficulty(@difficulty)
   {hashBuf, hashBigInt} = await @calculateHash()
 
@@ -102,7 +105,7 @@ BlockSchema.methods.validateHash = ->
   return true if hashBigInt < target
   return false
 
-BlockSchema.methods.mineBlock = (->
+BlockSchema.methods.mine = (->
   target = getTargetForDifficulty(@difficulty)
 
   _mine = () =>

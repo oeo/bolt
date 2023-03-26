@@ -1,57 +1,64 @@
 config = require './../config'
 
-mongoose = require 'mongoose'
-
-crypto = require('crypto')
-EC = require('elliptic').ec
-ec = new EC('secp256k1')
-
-Blockchain = require './../models/blockchain'
+crypto = require 'crypto'
+ec = require 'elliptic'
+bip39 = require 'bip39'
+hdkey = require 'hdkey'
 
 class Wallet
 
-  constructor: (@privateKey = null) ->
-    if @privateKey
-      return @fromPrivateKey(@privateKey)
+  constructor: (seedPhrase, privateKeyString) ->
+    if privateKeyString?
+      @keyPair = new ec.ec('secp256k1').keyFromPrivate(privateKeyString)
     else
-      @keyPair = ec.genKeyPair()
-      @publicKey = @keyPair.getPublic('hex')
-      @privateKey = @keyPair.getPrivate('hex')
-      @address = @createAddress()
+      if not seedPhrase?
+        seedPhrase = bip39.generateMnemonic()
 
-  createAddress: ->
-    publicKeyHash = crypto.createHash('sha256').update(Buffer.from(@publicKey, 'hex')).digest()
-    address = crypto.createHash('ripemd160').update(publicKeyHash).digest('hex')
-    return "b_#{address}"
+      seed = bip39.mnemonicToSeedSync(seedPhrase)
+      hdwallet = hdkey.fromMasterSeed(seed)
 
-  signTransaction: (transaction) ->
-    throw new Error('You cannot sign transactions for other wallets') if transaction.from isnt @address
-    hash = transaction.calculateHash()
-    sig = @keyPair.sign(hash, 'hex')
-    transaction.signature = sig.toDER('hex')
-    transaction.publicKey = @publicKey
-    return transaction
+      @keyPair = new ec.ec('secp256k1').keyFromPrivate(hdwallet.privateKey.toString('hex'))
+      @mnemonic = seedPhrase
 
-  fromPrivateKey: (privateKey) ->
-    keyPair = ec.keyFromPrivate(privateKey, 'hex')
-    wallet = new Wallet()
-    wallet.keyPair = keyPair
-    wallet.privateKey = privateKey
-    wallet.publicKey = keyPair.getPublic().encode('hex')
-    wallet.address = wallet.createAddress()
-    return wallet
+    @privateKey = @getPrivateKey()
+    @publicKey = @getPublicKey()
+    @address = @getAddress()
 
-  fromPublicKey: (publicKey) ->
-    keyPair = ec.keyFromPublic(publicKey,'hex')
-    wallet = new Wallet()
-    wallet.keyPair = keyPair
-    wallet.publicKey = publicKey
-    wallet.address = wallet.createAddress()
-    return wallet
+    @toJSON = (=>
+      tmp = {}
+      for k,v of @
+        if typeof v is 'string'
+          tmp[k] = v
+      return tmp
+    )
+
+    return @
 
   use: (blockchain) -> @_blockchain = blockchain
 
-  getBalance: (includeMempool=false) ->
+  getPrivateKey: ->
+    @keyPair.getPrivate('hex')
+
+  getPublicKey: ->
+    @keyPair.getPublic(false, 'hex')
+
+  getAddress: ->
+    publicKey = @getPublicKey()
+    hash = crypto.createHash('sha256').update(publicKey, 'hex').digest('hex')
+    address = 'b_' + hash.substring(0, 40)
+    address
+
+  signTransaction: (transaction) ->
+    if transaction.fromAddress != @address
+      throw new Error 'Cannot sign transactions for other wallets'
+
+    hash = transaction.calculateHash()
+    signature = @keyPair.sign(hash, 'hex')
+    transaction.sign(signature)
+
+    return transaction
+
+  getBalance: (includeMempool = false) ->
     if !@_blockchain
       throw new Error 'Not connected to a chain, use `wallet.use(blockchain)`'
 
@@ -66,5 +73,26 @@ class Wallet
         mempoolDebt: await @_blockchain.getMempoolDebt(@address)
       }
 
-
 module.exports = Wallet
+
+if !module.parent 
+
+  # Create a wallet with null (generate a new wallet)
+  wallet1 = new Wallet()
+  console.log 'Generated Wallet Mnemonic:', wallet1.mnemonic
+  console.log 'Generated Wallet Private Key:', wallet1.privateKey
+  console.log 'Generated Wallet Address:', wallet1.address
+
+  # Create a wallet with a mnemonic
+  mnemonic = 'museum guilt range belt angry naive friend forget pipe inquiry churn force'
+  wallet2 = new Wallet(mnemonic)
+  console.log 'Wallet 2 Mnemonic:', wallet2.mnemonic
+  console.log 'Wallet 2 Private Key:', wallet2.privateKey
+  console.log 'Wallet 2 Address:', wallet2.address
+
+  # Create a wallet with a private key
+  privateKey = 'c5b2471b767b2a0a1e374adaa93776e820f958a4ac6c88f93bfbac8e495cbca6'
+  wallet3 = new Wallet(null, privateKey)
+  console.log 'Wallet 3 Mnemonic:', wallet3.mnemonic
+  console.log 'Wallet 3 Private Key:', wallet3.privateKey
+  console.log 'Wallet 3 Address:', wallet3.address

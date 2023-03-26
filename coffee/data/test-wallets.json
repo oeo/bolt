@@ -1,0 +1,100 @@
+module.exports = [
+  {
+    "mnemonic": "moment badge ahead satisfy follow card artwork box sting suit chronic public",
+    "privateKey": "3d02ca8bf6035d5eeb35e32632361dd242ea07a71bcbb8516d0e9f73f235a15f",
+    "publicKey": "048785273b539200692692cb17e99a8420b3d9df723088f720ef22f976f21abefe4c43d9f73e9029d021e17c4c5e04d9868424f692db3d439ca81c16ff1c477cdb",
+    "address": "b_9db7f1534675e3988c3d5157e2cae16aafdbc4e7",
+    "name": "taky"
+  },
+  {
+    "mnemonic": "able debate frog tomato second allow slender outdoor before defy verb drive",
+    "privateKey": "34c05f4d9a3786602ac7032fdbac493e5f664d24fd674bcd014cc98c0f772c4c",
+    "publicKey": "0430055bea28bff42a71ee6f1e573c3eaa5acc7719879ec930210d59300d12e6728946ce098698864303d2aa99d9477b49ce50cef4b264613c661e8640dddc0cd1",
+    "address": "b_bf243d01befc5912f9c9f3d9e1557ba34244d919",
+    "name": "james"
+  },
+  {
+    "mnemonic": "vital subway palm home agree multiply reason number talent afford coconut tuna",
+    "privateKey": "309972574c894d84df2869ceee26c76e993adf56c9f2b3fde06238cbcde37748",
+    "publicKey": "04cb179148892e4ee36097332515b76707605a6b7c34521cb9ddbe263eb84c78fad8ea265479dc57796796cc5d2d409696bcc403f3ae855a4ff2bb02b9fb56a729",
+    "address": "b_372cd4ea6b8eebd2bb2001903c86f5e109c7e20e",
+    "name": "john"
+  },
+  {
+    "mnemonic": "faith clever weekend need dinner early bring thought enforce wise autumn scale",
+    "privateKey": "616bfeae908f4226499a0026eadb474301486e92266a50070bde8893206399d2",
+    "publicKey": "0449ff08af41514b791b56e38d611fe8e480c332314e6b438a93063f1e15c835a9ca722a03b49d8f10accb8f074d769072ccdea49cfa3661737b6a15435efd8708",
+    "address": "b_009993269299fe22315859558ed4edd535e67741",
+    "name": "robert"
+  },
+  {
+    "mnemonic": "follow follow price hub window disease surprise fitness link long more scan",
+    "privateKey": "1eb6d7db944232a49853e1507a8272017474cc5d2ec2b571ba6e9e1e4450c898",
+    "publicKey": "04f21cce900e3a5f3237f1a895fc21788a579b9880a26de9d12f867034c60fd1a64c1fec9cef6b0ef647557d15958b994ef948dc8c31bbd2afaa52f97988202efc",
+    "address": "b_33def238e4ca495373fb51adb622ece1cd2047ca",
+    "name": "michael"
+  },
+  {
+    "mnemonic": "snap found circle similar exhaust canoe satisfy coach remind target foster basket",
+    "privateKey": "af3fe1fc378b6e42ebd6d8db03612ae01bf2fbec2783f9535be3f63cc0e2ee82",
+    "publicKey": "045d3affff9472bfb72068201baaf0caccaf76fe3dfdbbe40efc500bbf46174ee712dd75d3f5d51cab646498151363caf25740c77441a13912d20745e5f198fedb",
+    "address": "b_c3516610a56b059a10ea45b9d54d4b77d524e431",
+    "name": "william"
+  },
+  {
+    "mnemonic": "word broken true door sentence weapon erosion hunt gravity update chaos calm",
+    "privateKey": "75bcb179aebfa2d45c5eb0f1c6ea14fb014d70dbb690a0906fbc43bd094a7c9d",
+    "publicKey": "04a422c50a9cfab8782d7fc4fe71eb81a77f9816eb99f51567e200e553ee1793b2f17c742f3cecbe6b15c3875984562caf017d63bf8d966c12311c1d18e57d3796",
+    "address": "b_9221bf7eb59ac2c138e7dcad1d5e254399c4db7d",
+    "name": "david"
+  },
+  {
+    "mnemonic": "habit never tackle phone scorpion oval private picture light still tongue bomb",
+    "privateKey": "5501438fcd0c5ccc1e0543a2fb385305ac906165aa1e6d9df7d4b356a574b969",
+    "publicKey": "04c8bea565d60aa88028a1bde7398fac7d52f26a1bb9c1f8ed71697e64b9b279aad6d9d4151dfbe820abe7b242de5a47070bbc8cf70af6a037a9a03c362ee94589",
+    "address": "b_6a87dd36fa51d2e411b30b3ceccdbf6230dc7dee",
+    "name": "richard"
+  },
+  {
+    "mnemonic": "differ twin swear tiger exchange brand people weird trick fox risk ribbon",
+    "privateKey": "d2d80b30bfb6742fb63407ad304d3a944bd53fd68ac9366ed72e4c6290e13b8c",
+    "publicKey": "047247a1c642145ea74cd603caf815a8dc1584d78638db44b038636ae1892710cc265961f71668b19ea7bdc2a2a0d81b09d1aefa3a9f2a94b9659eb75601c73187",
+    "address": "b_44fa7157110b8fcccd91c6eedad9c542c6f4d5ab",
+    "name": "joseph"
+  },
+  {
+    "mnemonic": "number bargain before grunt noodle movie cause actual divide radio pond lamp",
+    "privateKey": "ee162842b2f86da0057765a99930d213464302a9d3b373a4f25ccba0e340c774",
+    "publicKey": "0484be4688f3d63b4f2c52450ceb0f8993128e59424041980d0218b71414bbbc2f01237bb4b98ff634040d2f577c983321ecf9fd617f3cb14841041f0540e692cc",
+    "address": "b_c7e6b9879f68edf62fa8f51bdb2c4e6904541b67",
+    "name": "thomas"
+  },
+  {
+    "mnemonic": "clinic wage cluster crazy shoe lion tent area crater calm possible cave",
+    "privateKey": "1f8f18a2998e5ccc0351866112290cd8764686b9a52ddf9a9e85a7d833bec3a3",
+    "publicKey": "04af6a6aded9b8589db8f4e9d80dfa073177b5e62f02e2eb111c47b0916d084598f0ae66d3fabc598a322e2ed22517d45257c4a4de09b10b4910cdc1567828b3f4",
+    "address": "b_688ef94781f5b5dd1740fdb3e4d0ff1eec4adec3",
+    "name": "charles"
+  },
+  {
+    "mnemonic": "display panther gun call before sustain slow stand hollow coyote smoke ski",
+    "privateKey": "4c01503fe316b116619e38471afe44f101cd52fa0d9e8438e5ee8918755aefff",
+    "publicKey": "04fd1c5588f1d1e51d16256417b0d6b142a991fa571c1629d606a87d9a13316fd76143d25f82eca13293194dfe3870bc7a98feb3758916f2d76e96e6481d333cd2",
+    "address": "b_3f10c3f9c752e16ddeae3935f08986398bb01a9f",
+    "name": "doug"
+  },
+  {
+    "mnemonic": "artist manage valve panic strike demise wine edit shove learn denial employ",
+    "privateKey": "f8fa6d8c558d571cb3fea6da8dcc19958541e19e3e18b7aab0fec8a3230b2511",
+    "publicKey": "041051c78f20f58bd47c1fdc1d235501c3bc9f79248fa917d089cb1c935b5f155dadc1ff715eca87605c35f15144fa51337bbc0e8af8fe849ce9389c196d96b32e",
+    "address": "b_e77e98497382be0eee734e2a135d40ddeb480f2a",
+    "name": "bob"
+  },
+  {
+    "mnemonic": "view coyote marble mixture test reward various famous roast vanish ethics yard",
+    "privateKey": "fd1cebd657f657dec8f099ca13ad28b44844f87c7738c92171a49a6417000303",
+    "publicKey": "04a471e0e81e9c013852c0eaebe9e50c5fe6111d26daa029b33658c8902ba9fa330f9335f63ebcd4ab9841875c9473d18d5e5a57e770268347eb1fcce788eeed36",
+    "address": "b_013249ab7420d4eab482bf237911132153db8af1",
+    "name": "satoshi"
+  }
+]
