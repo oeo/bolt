@@ -27,7 +27,7 @@ if !testDbs?.length
 
 log 'Databases found to drop: ', testDbs.length, testDbs
 
-if !(answer = await confirm 'Are you sure you want to drop these databases?', 'N')
+if !(answer = await confirm 'Are you sure you want to drop these databases?', 'Y')
   throw new Error 'User aborted script'
 
 # do drop

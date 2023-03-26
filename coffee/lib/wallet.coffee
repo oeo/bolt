@@ -45,7 +45,7 @@ class Wallet
   getAddress: ->
     publicKey = @getPublicKey()
     hash = crypto.createHash('sha256').update(publicKey, 'hex').digest('hex')
-    address = 'b_' + hash.substring(0, 40)
+    address = 'b_' + hash.substring(0, 34)
     address
 
   signTransaction: (transaction) ->

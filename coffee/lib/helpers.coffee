@@ -25,7 +25,7 @@ _confirm = (question,defaultResponse='Y',cb) ->
   rl = readline.createInterface process.stdin, process.stdout
 
   if typeof(defaultResponse) is 'string'
-    defaultResponse = defaultResponse.toLowerCase().substr(1)
+    defaultResponse = defaultResponse.toLowerCase().substr(0,1)
   else if typeof(defaultResponse) is 'boolean'
     defaultResponse = 'n'
     if defaultResponse then defaultResponse = 'y'
@@ -45,7 +45,8 @@ _confirm = (question,defaultResponse='Y',cb) ->
   rl.question questionStr + ': ', (answer) ->
     validYes = ['y','yes']
 
-    if defaultBool then validYes.concat ['',null]
+    if defaultBool
+      validYes = validYes.concat ['',null]
 
     if answer?.trim?().toLowerCase() in validYes 
       answer = true
