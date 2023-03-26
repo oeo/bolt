@@ -1,4 +1,4 @@
-config = require './../config'
+module.exports = config = require './../config'
 
 global.log ?= console.log
 global.env ?= process.env
@@ -12,5 +12,3 @@ await mongoose.connect config.storage.mongo
 
 reve = require './redis-events'
 global.eve ?= new reve(config.storage.redis)
-
-module.exports = config
