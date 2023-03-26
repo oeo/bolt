@@ -50,6 +50,7 @@ module.exports.register = (commander) ->
     .description('get the balance of a wallet')
     .option('--include-mempool', 'include mempool transactions in the balance calculation')
     .action (address, options) ->
+      blockchain = new Blockchain()
       result = await blockchain.addressBalance(
         address,
         options.includeMempool
