@@ -7,13 +7,7 @@ Block = require './block'
   median,
   calculateBlockReward,
   calculateBlockDifficulty,
-} = require './../lib/helpers'
-
-{
   time,
-  sha256,
-  indentedJSON,
-  isObject,
 } = require './../lib/helpers'
 
 BlockchainSchema = new mongoose.Schema({

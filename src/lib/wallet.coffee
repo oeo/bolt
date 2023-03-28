@@ -7,7 +7,7 @@ hdkey = require 'hdkey'
 
 class Wallet
 
-  constructor: (seedPhrase, privateKeyString) ->
+  constructor: (seedPhrase, privateKeyString, addressPrefix = 'b_') ->
     if privateKeyString?
       @keyPair = new ec.ec('secp256k1').keyFromPrivate(privateKeyString)
     else
@@ -22,7 +22,7 @@ class Wallet
 
     @privateKey = @getPrivateKey()
     @publicKey = @getPublicKey()
-    @address = @getAddress()
+    @address = @getAddress(addressPrefix)
 
     @toJSON = (=>
       tmp = {}
@@ -42,10 +42,10 @@ class Wallet
   getPublicKey: ->
     @keyPair.getPublic(false, 'hex')
 
-  getAddress: ->
+  getAddress: (addressPrefix = 'b_') ->
     publicKey = @getPublicKey()
     hash = crypto.createHash('sha256').update(publicKey, 'hex').digest('hex')
-    address = 'b_' + hash.substring(0, 34)
+    address = addressPrefix + hash.substring(0, 34)
     address
 
   signTransaction: (transaction) ->
@@ -73,6 +73,11 @@ class Wallet
         mempoolDebt: await @_blockchain.getMempoolDebt(@address)
       }
 
+  # check if address is valid
+  @isValidAddress: (address) ->
+    addressRegex = /^(b_|c_)[0-9a-fA-F]{34}$/
+    addressRegex.test(address)
+
 module.exports = Wallet
 
 ## test
@@ -97,3 +102,7 @@ if !module.parent
   console.log 'Wallet 3 Mnemonic:', wallet3.mnemonic
   console.log 'Wallet 3 Private Key:', wallet3.privateKey
   console.log 'Wallet 3 Address:', wallet3.address
+
+  # create a contract address
+  console.log /contractAddress/, new Wallet(null,null,'c_').address
+  # c_8fdb3e082dce66d5eebd53eb1339d8cec3

@@ -7,9 +7,11 @@ config = {
   algo: 'scrypt'
   minFee: 0.0001
   maxBlockSize: 1024 * 1024 
+  maxContractStateSize: 1024 * 1024 
   maxTransactionsPerBlock: 4000
   maxTransactionCommentSize: 32
   maxBlockCommentSize: 32
+  maxContractCommentSize: 32
   rewardDefault: 50
   rewardHalvingInterval: 210000 # blocks
   blockInterval: 60 * 60 # 1hr 

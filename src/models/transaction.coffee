@@ -17,6 +17,13 @@ TransactionSchema = new mongoose.Schema({
   from: {type:String} 
   to: {type:String,required:true}
 
+  # support contracts
+  contractFn: {type:String,default:null} 
+  contractArgs: [{
+    type: mongoose.Schema.Types.Mixed
+    default: []
+  }] 
+
   fee: {
     type: Number
     default: config.minFee
@@ -35,8 +42,8 @@ TransactionSchema = new mongoose.Schema({
     maxLength: config.maxTransactionCommentSize
   }
 
-  publicKey: {type:String}
-  signature: {type:String}
+  publicKey: String 
+  signature: String 
 
   ctime: {
     type: Number
@@ -49,6 +56,8 @@ TransactionSchema.methods.calculateHash = ->
   return sha256([
     @from
     @to
+    @contractFn
+    @contractArgs
     @amount
     @fee
     @comment
