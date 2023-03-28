@@ -6,11 +6,6 @@ Blockchain = require './blockchain'
 Wallet = require './../lib/wallet'
 
 {
-  sha256,
-  time,
-} = require './../lib/helpers'
-
-{
   time,
   sha256,
   indentedJSON,

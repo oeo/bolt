@@ -17,7 +17,6 @@ TransactionSchema = new mongoose.Schema({
   from: {type:String} 
   to: {type:String,required:true}
 
-  # support contracts
   contractFn: {type:String,default:null} 
   contractArgs: [{
     type: mongoose.Schema.Types.Mixed
