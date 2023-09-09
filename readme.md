@@ -5,7 +5,7 @@ bolt is a censorship-resistant, distributed proof-of-work blockchain designed fo
 ## features
 
 - **censorship resistance**: bolt allows for immutable data posting, making it resistant to censorship.
-- **scrypt algorithm**: designed to be cpu-efficient, making it accessible for a wide range of hardware.
+- **scrypt**: designed to be cpu-efficient, making it accessible for a wide range of hardware.
 - **native currency**: bolt has its native currency for rewarding miners.
 - **data posting**: the blockchain is designed to store and handle data posts securely.
 
@@ -46,12 +46,12 @@ bolt is a censorship-resistant, distributed proof-of-work blockchain designed fo
 
 ## configuration
 
-- `version`: blockchain version
-- `staging`: staging environment flag
-- `minfee`: minimum transaction fee
-- `maxblocksize`: maximum block size
-- `rewarddefault`: default block reward
-- `difficultydefault`: default mining difficulty
+- `VERSION`: blockchain version
+- `STAGING`: staging environment flag
+- `minFee`: minimum transaction fee
+- `maxBlockSize`: maximum block size
+- `rewardDefault`: default block reward
+- `difficultyDefault`: default mining difficulty
 
 for more details, refer to `config.coffee`.
 
