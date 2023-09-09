@@ -1,57 +1,57 @@
-## Introduction
+## introduction
 
-Bolt is a censorship-resistant, distributed Proof-of-Work blockchain designed for data posting. The blockchain is built using CoffeeScript and leverages the Scrypt algorithm for CPU efficiency. Miners are rewarded in Bolt, the native currency of the chain.
+bolt is a censorship-resistant, distributed proof-of-work blockchain designed for data posting. the blockchain is built using coffeescript and leverages the scrypt algorithm for cpu efficiency. miners are rewarded in bolt, the native currency of the chain.
 
-## Features
+## features
 
-- **Censorship resistance**: Bolt allows for immutable data posting, making it resistant to censorship.
-- **Scrypt algorithm**: Designed to be CPU-efficient, making it accessible for a wide range of hardware.
-- **Native currency**: Bolt has its native currency for rewarding miners.
-- **Data posting**: The blockchain is designed to store and handle data posts securely.
+- **censorship resistance**: bolt allows for immutable data posting, making it resistant to censorship.
+- **scrypt algorithm**: designed to be cpu-efficient, making it accessible for a wide range of hardware.
+- **native currency**: bolt has its native currency for rewarding miners.
+- **data posting**: the blockchain is designed to store and handle data posts securely.
 
-## Getting Started
+## getting started
 
-### Prerequisites
+### prerequisites
 
-- Node.js
-- CoffeeScript
-- MongoDB
-- Redis
+- node.js
+- coffeescript
+- mongodb
+- redis
 
-### Installation
+### installation
 
-1. Clone the repository
-2. Install dependencies
-3. Update the `config.coffee` file as necessary
-4. Run the miner
+1. clone the repository
+2. install dependencies
+3. update the `config.coffee` file as necessary
+4. run the miner
 
-### Files & directories
+### files & directories
 
-#### Main files
-- `miner.coffee`: Contains the mining logic and environment setup.
-- `config.coffee`: Holds global configurations for the blockchain.
+#### main files
+- `miner.coffee`: contains the mining logic and environment setup.
+- `config.coffee`: holds global configurations for the blockchain.
 
-#### Models
-- `models/contract.coffee`: Defines smart contracts.
-- `models/blockchain.coffee`: Contains main blockchain logic.
-- `models/transaction.coffee`: Defines transactions.
-- `models/block.coffee`: Defines blocks.
+#### models
+- `models/contract.coffee`: defines smart contracts.
+- `models/blockchain.coffee`: contains main blockchain logic.
+- `models/transaction.coffee`: defines transactions.
+- `models/block.coffee`: defines blocks.
 
-#### Libraries
-- `lib/helpers.coffee`: Provides utility functions.
-- `lib/wallet.coffee`: Manages wallet operations.
+#### libraries
+- `lib/helpers.coffee`: provides utility functions.
+- `lib/wallet.coffee`: manages wallet operations.
 
-#### Scripts
-- `scripts/generate-wallets.coffee`: Utility script for generating wallets.
+#### scripts
+- `scripts/generate-wallets.coffee`: utility script for generating wallets.
 
-## Configuration
+## configuration
 
-- `VERSION`: Blockchain version
-- `STAGING`: Staging environment flag
-- `minFee`: Minimum transaction fee
-- `maxBlockSize`: Maximum block size
-- `rewardDefault`: Default block reward
-- `difficultyDefault`: Default mining difficulty
+- `version`: blockchain version
+- `staging`: staging environment flag
+- `minfee`: minimum transaction fee
+- `maxblocksize`: maximum block size
+- `rewarddefault`: default block reward
+- `difficultydefault`: default mining difficulty
 
-For more details, refer to `config.coffee`.
+for more details, refer to `config.coffee`.
 
