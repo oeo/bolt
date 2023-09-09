@@ -1,4 +1,8 @@
-<p><img src="assets/bolt.svg" height="50"/></p>
+<center>
+  <p>
+    <img src="assets/bolt.svg" height="75"/>
+  </p>
+</center>
 
 ## introduction
 
