@@ -1,4 +1,5 @@
 <p align="center">
+  <br/>
   <img src="assets/bolt.svg" height="75"/>
 </p>
 
