@@ -1,6 +1,5 @@
 <p align="center">
-  <br/>
-  <img src="assets/bolt.svg" height="75"/>
+  <img src="assets/bolt.svg" height="65"/>
 </p>
 
 bolt is a censorship-resistant, distributed proof-of-work blockchain designed for data posting. the blockchain is built using coffeescript and leverages the scrypt algorithm for cpu efficiency. miners are rewarded in bolt, the native currency of the chain.
