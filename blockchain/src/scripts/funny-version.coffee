@@ -325,3 +325,4 @@ module.exports = versions = {
 if !module.parent
   log versions.generate(true,'-')
   process.exit 0
+

@@ -1,4 +1,5 @@
 #!/usr/bin/env coffee
+require './../lib/globals'
 config = require './../config'
 
 Wallet = require './../lib/wallet'
@@ -30,3 +31,4 @@ for x in names
   wallets.push json
 
 log JSON.stringify(wallets,null,2)
+
