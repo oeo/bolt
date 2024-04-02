@@ -18,13 +18,29 @@ bolt intends to launch with a fair distribution and without a premine or fundrai
 the block time and issuance schedule is designed to follow roughly the 
 schedule and behviour of bitcoin.
 
-### file structure
+### structure
 
 - `assets/`: contains static assets and brandables.
-- `blockchain/`: contains the blockchain component written in coffeescript
-- `hash/rust/`: contains the custom hashing function that is written in rust
+- `blockchain/`: contains the blockchain component written in coffeescript.
+- `hash/rust/`: contains the custom hashing function that is written in rust.
 
 ## @todo
-- [ ] `block-explorer/`: contains a react-based block explorer gui.
 - [ ] `browser-wallet/`: contains the chrome and firefox wallet extension.
+- [ ] `www-explorer/`: contains a react-based block explorer gui.
+- [ ] `www-homepage/`: contains the homepage for bolt.
+
+---
+
+## fair distribution
+bolt intends to launch with a fair distribution and without a premine and
+without fundraising, although there may be an airdrop to existing bitcoin
+wallets.
+
+the configured block time and issuance schedule is designed to follow 
+roughly the schedule and behviour of bitcoin. at the very least the features of 
+digital scarcity and proof of work will remain constant. however, we do reserve
+the rights the play with new features such as our own smart contract language and
+logic, utilizing different hashing algorythms, and so on. if the community of
+nodes accepts our changes they will be implemented. if not, then i suppose
+we fell short in some way. it's a real organic dao!
 
