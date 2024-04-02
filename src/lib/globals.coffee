@@ -1,3 +1,5 @@
+process.noDeprecation = true
+
 module.exports = config = require './../config'
 
 global.log ?= console.log
@@ -12,3 +14,4 @@ await mongoose.connect config.storage.mongo
 
 reve = require './redis-events'
 global.eve ?= new reve(config.storage.redis)
+

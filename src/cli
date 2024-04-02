@@ -7,3 +7,4 @@ commander = require 'commander'
 
 commander.parse process.argv
 commander.outputHelp() if process.argv.length <= 2
+

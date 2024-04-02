@@ -1,5 +1,43 @@
-node_modules
-.DS_Store
-yarn-error.log
-env
+# rust
+target/
+**/*.rs.bk
+
+# cargo.lock - uncomment for libraries, keep for binaries
+# cargo.lock
+
+# editor & ide
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.ds_store
+thumbs.db
+
+# project and env
+node_modules/
+tmp/
 .env
+package-lock.json
+yarn-lock.json
+
+# compiled python
+*.pyc
+
+# logs
+*.log
+*.sqlite
+
+# build outputs
+/dist/
+/build/
+/out/
+
+# archives
+*.zip
+*.tar
+*.gz
+*.bz2
+*.7z
+*.rar
+

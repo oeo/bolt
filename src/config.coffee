@@ -2,12 +2,12 @@ VERSION = 'furious-fish'
 STAGING = true
 
 config = {
-  version: VERSION 
+  version: VERSION
   staging: false
   algo: 'scrypt'
   minFee: 0.0001
-  maxBlockSize: 1024 * 1024 
-  maxContractStateSize: 1024 * 1024 
+  maxBlockSize: 1024 * 1024
+  maxContractStateSize: 1024 * 1024
   maxTransactionsPerBlock: 4000
   maxTransactionCommentSize: 32
   maxBlockCommentSize: 32
@@ -21,7 +21,7 @@ config = {
   difficultyChangeBlockConsideration: 3
   confirmations: 6
   storage: {
-    mongo: 'mongodb://127.0.0.1:27017/prod-' + VERSION 
+    mongo: 'mongodb://127.0.0.1:27017/prod-' + VERSION
     redis: 'redis://127.0.0.1:6379/'
   }
   ports: {
@@ -34,22 +34,23 @@ configStaging = {
   version: 'stage-' + config.version
   staging: true
   blockInterval: 10
-  rewardHalvingInterval: 50 
-  storage: { 
+  rewardHalvingInterval: 50
+  storage: {
     mongo: 'mongodb://127.0.0.1:27017/stage-' + config.version
     redis: 'redis://127.0.0.1:6379/'
   }
 }
 
-if STAGING 
+if STAGING
   config[k] = v for k,v of configStaging
 
 config.genesisBlock = {
   _id: 0
   transactions: []
   hash_previous: '0000000000000000000000000000000000000000000000000000000000000000'
-  difficulty: config.difficultyDefault 
+  difficulty: config.difficultyDefault
   comment: 'genesis'
 }
 
 module.exports = config
+
