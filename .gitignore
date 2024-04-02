@@ -16,10 +16,8 @@ thumbs.db
 
 # project and env
 node_modules/
-tmp/
+.tmp
 .env
-package-lock.json
-yarn-lock.json
 
 # compiled python
 *.pyc
