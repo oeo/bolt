@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="../assets/bolt.svg" height="65"/>
+  <img src="assets/bolt.svg" height="65"/>
 </p>
 
 bolt is a censorship-resistant, distributed proof-of-work blockchain designed 
