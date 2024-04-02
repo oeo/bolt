@@ -1,20 +1,3 @@
-<p align="center">
-  <img src="../assets/bolt.svg" height="65"/>
-</p>
-
-bolt is a censorship-resistant, distributed proof-of-work blockchain designed 
-to have bitcoin's best characteristics. The blockchain is built using using 
-coffeescript and leverages it's [custom hashing function](../hash/rust) for 
-balanced performance between cpu and gpu mining. miners are rewarded in bolt,
-the native currency of the chain.
-
-## features
-
-- **censorship resistance**: bolt allows for immutable data posting, making it resistant to censorship.
-- **custom hashing function**: designed to attempt to provide similar performance between cpu and gpu mining.
-- **native currency**: bolt has its native currency for rewarding miners.
-- **bitcoin characteristics**: the blockchain is designed to inherit bitcoin's characteristics.
-
 ## getting started
 
 ### prerequisites
