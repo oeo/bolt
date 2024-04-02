@@ -21,7 +21,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "bolthash"
+name = "bolt_hash"
 version = "0.1.0"
 dependencies = [
  "blake2",
