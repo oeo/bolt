@@ -1,7 +1,5 @@
-<p align="center">
-  <img src="assets/bolt.svg" height="65"/>
-</p>
-
+# bolt
+<img src="assets/bolt.svg" height="65" align="right" />
 bolt is a censorship-resistant, distributed proof-of-work blockchain designed 
 to have bitcoin's best characteristics. The blockchain is built using using 
 coffeescript and leverages it's [custom hashing function](../hash/rust) for 
