@@ -22,12 +22,15 @@ schedule and behviour of bitcoin.
 
 - `assets/`: contains static assets and brandables.
 - `blockchain/`: contains the blockchain component written in coffeescript.
-- `hash/rust/`: contains the custom hashing function that is written in rust.
+- `bolthash/rust/`: contains the custom hashing function that is written in rust.
+  - note: this is ported to other language libraries like webasm for browsers and node.js for non-web node applications. examples are provided for each.
 
 ## @todo
-- [ ] `browser-wallet/`: contains the chrome and firefox wallet extension.
-- [ ] `www-explorer/`: contains a react-based block explorer gui.
-- [ ] `www-homepage/`: contains the homepage for bolt.
+- `wallet/`: contains different wallets for the project
+  - [ ] `browser-extension/`: browser extension wallet
+- `web/`: contains all web projects
+  - [ ] `explorer/`: contains a react-based block explorer.
+  - [ ] `homepage/`: contains the homepage for bolt.
 
 ---
 

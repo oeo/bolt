@@ -4,7 +4,7 @@ STAGING = true
 config = {
   version: VERSION
   staging: false
-  algo: 'scrypt'
+  algo: 'bolthash' # valid: [scrypt, bolthash]
   minFee: 0.0001
   maxBlockSize: 1024 * 1024
   maxContractStateSize: 1024 * 1024
@@ -51,6 +51,8 @@ config.genesisBlock = {
   difficulty: config.difficultyDefault
   comment: 'genesis'
 }
+
+console.log config
 
 module.exports = config
 
