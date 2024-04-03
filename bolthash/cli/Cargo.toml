@@ -1,5 +1,5 @@
 [package]
-name = "bolthash-cli"
+name = "bolthash"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 bolt_hash = { path = "../rust" }
+atty = "0.2.14"
 

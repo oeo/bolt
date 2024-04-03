@@ -1,20 +1,26 @@
 use bolt_hash::custom_hash;
 use std::env;
+use std::io::{self, Read};
+use atty::Stream;
 
 fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
 
-    if args.is_empty() || args.contains(&"-h".to_string()) || args.contains(&"--help".to_string()) {
+    if args.contains(&"-h".to_string()) || args.contains(&"--help".to_string()) || (args.is_empty() && atty::is(Stream::Stdin)) {
         print_help();
         return;
     }
 
-    // Process a single argument without echoing it back
-    if args.len() == 1 {
+    if args.is_empty() {
+        let mut buffer = String::new();
+        io::stdin().read_to_string(&mut buffer).expect("Failed to read from stdin");
+        let input = buffer.trim_end();
+        let hash = custom_hash(input.as_bytes());
+        println!("{}", hash);
+    } else if args.len() == 1 {
         let hash = custom_hash(&args[0].as_bytes());
         println!("{}", hash);
     } else {
-        // Process multiple arguments, echoing each back with its hash
         for arg in args {
             let hash = custom_hash(&arg.as_bytes());
             println!("{} {}", hash, arg);

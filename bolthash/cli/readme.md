@@ -5,7 +5,7 @@ this application uses the rust bolthash library to convert strings into hashes.
 
 ## usage
 
-`bolthash` supports hashing via command line arguments or stdin. when no
+`bolthash-cli` supports hashing via command line arguments or stdin. when no
 arguments are provided, it expects input from stdin.
 
 ### examples
