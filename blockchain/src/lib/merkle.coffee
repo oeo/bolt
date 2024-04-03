@@ -5,7 +5,7 @@ module.exports = merkle_hash = (array) ->
     throw new Error('Input must be an array')
 
   if array.length == 0
-    return '' 
+    return ''
 
   obj = {}
   for i in [0...array.length]

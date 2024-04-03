@@ -5,6 +5,7 @@ module.exports = config = require './../config'
 global.log ?= console.log
 global.env ?= process.env
 global.exit ?= process.exit
+
 global._ ?= require 'lodash'
 
 require 'colors'

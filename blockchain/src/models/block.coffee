@@ -2,17 +2,16 @@ config = require './../config'
 
 mongoose = require 'mongoose'
 
-{Transaction,TransactionSchema} = require './transaction'
+{ Transaction, TransactionSchema } = require './transaction'
 
 merkle = require './../lib/merkle'
 
 {
   time,
+  createHash,
   calculateBlockReward,
   calculateBlockDifficulty,
 } = require './../lib/helpers'
-
-{scryptAsync} = require('@noble/hashes/scrypt')
 
 BlockSchema = new mongoose.Schema({
 
@@ -37,19 +36,19 @@ BlockSchema = new mongoose.Schema({
   hash: {
     type: String
     required: true
-    default: null 
-  } 
+    default: null
+  }
 
   hash_previous: {
     type: String
     required: true
     default: null
-  } 
+  }
 
   hash_merkle: {
     type: String
     default: -> merkle(this.transactions)
-  } 
+  }
 
   difficulty: {
     type: Number
@@ -58,19 +57,19 @@ BlockSchema = new mongoose.Schema({
   }
 
   nonce: {
-    type: Number 
-    default: 0 
+    type: Number
+    default: 0
     required: true
   }
 
   time_elapsed: {
     type: Number
     default: 0
-  } 
+  }
 
   ctime: {
     type: Number
-    default: -> time() 
+    default: -> time()
   }
 
 }, {versionKey:false,strict:true})
@@ -101,15 +100,15 @@ BlockSchema.pre 'save', (next) ->
 BlockSchema.post 'save', (doc) ->
   eve.emit 'block_solved', {
     height: doc._id
-    blockchain: doc.blockchain 
+    blockchain: doc.blockchain
   }
 
-  await mongoose.model('Blockchain') 
+  await mongoose.model('Blockchain')
     .updateOne {_id: doc.blockchain}
     .set {
       height: doc._id
       difficulty: doc.difficulty
-      time_last_block: doc.ctime 
+      time_last_block: doc.ctime
     }
 
 # calculate block hash 
@@ -123,7 +122,10 @@ BlockSchema.methods.calculateHash = (returnString = false) ->
     "#{@nonce}"
   ].join('')
 
-  hashBuf = await scryptAsync(str, '', { N: 1024, r: 8, p: 1, dkLen: 32 })
+  hashBuf = createHash(str, {
+    type: config.algo
+  })
+
   hashBigInt = BigInt("0x#{Buffer.from(hashBuf).toString('hex')}")
 
   if returnString
@@ -147,7 +149,7 @@ BlockSchema.methods.isValid = ->
   recomputedHash = Buffer.from(hashBuf).toString('hex')
 
   if recomputedHash isnt @hash
-    return new Error '`hash` invalid' 
+    return new Error '`hash` invalid'
 
   hashValid = hashBigInt < target
   return new Error('`hashBigInt` invalid (too small)') if !hashValid
@@ -158,8 +160,8 @@ BlockSchema.methods.isValid = ->
 
   # check reward 
   if @transactions.length
-    rewardItem = _.find(@transactions,{from:null,comment:'block_reward'}) 
-    if rewardItem.amount isnt (await calculateBlockReward(@_id)) 
+    rewardItem = _.find(@transactions,{ from: null, comment: 'block_reward' })
+    if rewardItem.amount isnt (await calculateBlockReward(@_id))
       return new Error '`minerReward` invalid'
 
   # check merkle
@@ -167,12 +169,12 @@ BlockSchema.methods.isValid = ->
     return new Error '`hash_merkle` is invalid'
 
   # block valid 
-  return true 
+  return true
 
 BlockSchema.methods.xmine = (->
   _mine = () =>
     target = getTargetForDifficulty(@difficulty)
-    {hashBuf, hashBigInt} = await @calculateHash()
+    { hashBuf, hashBigInt } = await @calculateHash()
 
     if hashBigInt < target
       @hash = Buffer.from(hashBuf).toString('hex')
@@ -192,7 +194,7 @@ BlockSchema.methods.mine = ->
 
   cancelMining = new Promise (resolve) =>
     eve.once 'block_solved', (data) =>
-      if data.height is _height and data.blockchain is _blockchain 
+      if data.height is _height and data.blockchain is _blockchain
         miningCanceled = true
         resolve()
 
@@ -202,7 +204,7 @@ BlockSchema.methods.mine = ->
   # Convert the recursive mining function to a while loop
   _mine = =>
     target = getTargetForDifficulty(@difficulty)
-    iterationsBeforeCheckingCancel = 250 
+    iterationsBeforeCheckingCancel = 250
 
     while not miningCanceled
       for i in [1..iterationsBeforeCheckingCancel] by 1
@@ -220,5 +222,6 @@ BlockSchema.methods.mine = ->
 
   return _mine()
 
-Block = mongoose.model 'Block', BlockSchema 
-module.exports = Block 
+Block = mongoose.model 'Block', BlockSchema
+module.exports = Block
+

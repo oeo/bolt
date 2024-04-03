@@ -1,33 +1,75 @@
 config = require './../config'
 
-crypto = require 'crypto'
 ec = require 'elliptic'
 bip39 = require 'bip39'
 hdkey = require 'hdkey'
 
+{
+  createHash
+  buildDerivationPath
+  base_encode
+  base_decode
+} = require './helpers'
+
 class Wallet
 
-  constructor: (seedPhrase, privateKeyString, addressPrefix = 'b_') ->
-    if privateKeyString?
-      @keyPair = new ec.ec('secp256k1').keyFromPrivate(privateKeyString)
-    else
-      if not seedPhrase?
-        seedPhrase = bip39.generateMnemonic()
+  constructor: (opt = {
+    seedPhrase: null
+    privateKeyString: null
+    addressPrefix: 'b'
+    derivationPath: config.derivationPath
+  }) ->
+    defaults = {
+      seedPhrase: opt.seed ? null
+      privateKeyString: opt.privateKey ? null
+      addressPrefix: opt.prefix ? 'b'
+      derivationPath: opt.path ? null
+    }
 
+    for k,v of defaults
+      opt[k] ?= v
+
+    @opt = opt
+
+    @new = false
+    @mnemonic = null
+
+    if !opt.seedPhrase and !opt.privateKeyString
+      @new = true
+
+      seedPhrase = bip39.generateMnemonic()
       seed = bip39.mnemonicToSeedSync(seedPhrase)
-      hdwallet = hdkey.fromMasterSeed(seed)
 
-      @keyPair = new ec.ec('secp256k1').keyFromPrivate(hdwallet.privateKey.toString('hex'))
+      @hdwallet = hdkey.fromMasterSeed(seed)
       @mnemonic = seedPhrase
 
-    @privateKey = @getPrivateKey()
-    @publicKey = @getPublicKey()
-    @address = @getAddress(addressPrefix)
+      masterKey = @hdwallet.derive('m')
+      @keyPair = new ec.ec('secp256k1').keyFromPrivate(masterKey.privateKey.toString('hex'))
+
+    if opt.privateKeyString and !opt.seedPhrase
+      @keyPair = new ec.ec('secp256k1').keyFromPrivate(opt.privateKeyString)
+
+    if opt.seedPhrase and !opt.privateKeyString
+      seed = bip39.mnemonicToSeedSync(@opt.seedPhrase)
+
+      @hdwallet = hdkey.fromMasterSeed(seed)
+      @mnemonic = @opt.seedPhrase
+
+      masterKey = @hdwallet.derive('m')
+      @keyPair = new ec.ec('secp256k1').keyFromPrivate(masterKey.privateKey.toString('hex'))
+
+    keyInfo = @getKeyInfo(@keyPair)
+
+    for k,v of keyInfo
+      this[k] = v
 
     @toJSON = (=>
       tmp = {}
       for k,v of @
-        if typeof v is 'string'
+        if typeof v is 'string' or k in [
+          'new'
+          'hdwallet'
+        ]
           tmp[k] = v
       return tmp
     )
@@ -36,23 +78,72 @@ class Wallet
 
   use: (blockchain) -> @_blockchain = blockchain
 
-  getPrivateKey: ->
-    @keyPair.getPrivate('hex')
+  getKeyInfo: (keyPair = null) ->
+    if !keyPair then keyPair = @keyPair
+    if !@keyPair then throw new Error 'No keyPair provided'
 
-  getPublicKey: ->
-    @keyPair.getPublic(false, 'hex')
+    tmp = {
+      privateKey: keyPair.getPrivate 'hex'
+      publicKey: keyPair.getPublic false, 'hex'
+    }
 
-  getAddress: (addressPrefix = 'b_') ->
-    publicKey = @getPublicKey()
-    hash = crypto.createHash('sha256').update(publicKey, 'hex').digest('hex')
-    address = addressPrefix + hash.substring(0, 34)
-    address
+    tmp.address = createHash tmp.publicKey
+    tmp.address = tmp.address.substr 0, 34
+
+    tmp.address58 = 'bolt' + base_encode(58, tmp.address)
+    tmp.address = 'bolt' + tmp.address
+
+    tmp.addresses = [
+      tmp.address
+      tmp.address58
+    ]
+
+    return tmp
+
+  # New method to generate multiple addresses without altering the wallet's state
+  createAddresses: (opt = {
+    account: 0
+    change: 0
+    count: 0
+    indexStart: 0
+  }) ->
+    defaults = {
+      account: opt.account
+      change: opt.change
+      count: 10
+      indexStart: 0
+    }
+
+    for k,v of defaults
+      opt[k] ?= v
+
+    addresses = []
+
+    for index in [opt.indexStart...opt.indexStart + opt.count]
+      path = buildDerivationPath {
+        account: opt.account,
+        change: opt.change,
+        index: index
+      }
+
+      derivedKey = @hdwallet.derive(path)
+
+      keyPair = new ec.ec('secp256k1').keyFromPrivate(derivedKey.privateKey.toString('hex'))
+      keyInfo = @getKeyInfo keyPair
+
+      addr = keyInfo
+      addr.path = path
+
+      addresses.push addr
+
+    return addresses
 
   signTransaction: (transaction) ->
-    if transaction.fromAddress != @address
+    if transaction.fromAddress !in @address
       throw new Error 'Cannot sign transactions for other wallets'
 
     hash = transaction.calculateHash()
+
     signature = @keyPair.sign(hash, 'hex')
     transaction.sign(signature)
 
@@ -74,35 +165,60 @@ class Wallet
       }
 
   # check if address is valid
-  @isValidAddress: (address) ->
-    addressRegex = /^(b_|c_)[0-9a-fA-F]{34}$/
-    addressRegex.test(address)
+  isValidAddress: (address) ->
+    addressRegex = /^bolt[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{22,34}$/
+    return addressRegex.test(address)
 
 module.exports = Wallet
 
 ## test
-if !module.parent 
+if !module.parent
 
   # Create a wallet with null (generate a new wallet)
   wallet1 = new Wallet()
-  console.log 'Generated Wallet Mnemonic:', wallet1.mnemonic
-  console.log 'Generated Wallet Private Key:', wallet1.privateKey
-  console.log 'Generated Wallet Address:', wallet1.address
+
+  log 'Wallet 1:'
+  log JSON.stringify wallet1, null, 2
+
+  addresses = wallet1.createAddresses({
+    account: 0
+    count: 5
+  })
+
+  # create a new wallet using the last generated child address
+  walletChild = new Wallet(
+    privateKey: _.last(addresses).privateKey
+  )
 
   # Create a wallet with a mnemonic
   mnemonic = 'museum guilt range belt angry naive friend forget pipe inquiry churn force'
-  wallet2 = new Wallet(mnemonic)
-  console.log 'Wallet 2 Mnemonic:', wallet2.mnemonic
-  console.log 'Wallet 2 Private Key:', wallet2.privateKey
-  console.log 'Wallet 2 Address:', wallet2.address
+
+  wallet2 = new Wallet({
+    seed: mnemonic,
+  })
+
+  log 'Wallet 2:'
+  log JSON.stringify wallet2, null, 2
 
   # Create a wallet with a private key
   privateKey = 'c5b2471b767b2a0a1e374adaa93776e820f958a4ac6c88f93bfbac8e495cbca6'
-  wallet3 = new Wallet(null, privateKey)
-  console.log 'Wallet 3 Mnemonic:', wallet3.mnemonic
-  console.log 'Wallet 3 Private Key:', wallet3.privateKey
-  console.log 'Wallet 3 Address:', wallet3.address
+  wallet3 = new Wallet({ privateKey })
 
-  # create a contract address
-  console.log /contractAddress/, new Wallet(null,null,'c_').address
-  # c_8fdb3e082dce66d5eebd53eb1339d8cec3
+  log 'Wallet 3:'
+  log JSON.stringify wallet3, null, 2
+
+  # Create a wallet with a custom derivation path
+  derivationPath = 'm/44h/0h/0h'
+  wallet4 = new Wallet({ prefix: 'b', path: derivationPath })
+
+  log 'Wallet 4:'
+  log JSON.stringify wallet4, null, 2
+
+  # Derive a new address from a wallet
+  addresses = wallet4.createAddresses({ count: 1 })
+
+  log 'Wallet 4 (derived address):'
+  log JSON.stringify addresses, null, 2
+
+  exit 0
+
