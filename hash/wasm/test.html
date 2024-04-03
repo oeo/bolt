@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Rust Wasm Example</title>
+</head>
+<body>
+  <h1>BoltHash WebASM library</h1>
+  <form>
+    <label for="inputText">Input Text:</label><br>
+    <input type="text" id="inputText" name="inputText"><br>
+    <label for="hashOutput">Hash Output:</label><br>
+    <textarea id="hashOutput" name="hashOutput" rows="4" cols="50" readonly></textarea>
+  </form>
+  <script type="module">
+    import init, { encode } from './pkg/bolt_hash_wasm.js';
+
+    // Initializes the wasm module once the page loads
+    window.addEventListener('DOMContentLoaded', async (event) => {
+      await init()
+      document.getElementById('inputText').addEventListener('input', async (event) => {
+        const inputText = event.target.value; // Get the current value of the input
+        const hash = await encode(inputText); // Hash the input
+        document.getElementById('hashOutput').value = hash; // Update the textarea with the hash
+      });
+    });
+  </script>
+</body>
+</html>
+
