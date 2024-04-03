@@ -33,6 +33,8 @@ digital scarcity and proof of work will remain constant. however, i'll reserve
 the right the play with modern features such as a smart contract language, 
 different hashing algos, and so on prior to launch.
 
+---
+
 ### @todo
 - [ ] node
   - [ ] p2p node coms fleshed out for syncing data
