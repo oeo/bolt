@@ -4,7 +4,7 @@ STAGING = true
 config = {
   version: VERSION
   staging: false
-  algo: 'bolthash' # valid: [sha or sha256, scrypt, bolthash]
+  algo: 'scrypt' # valid: [sha or sha256, scrypt, bolthash]
   minFee: 0.0001
   maxBlockSize: 1024 * 1024
   maxContractStateSize: 1024 * 1024
@@ -62,6 +62,9 @@ config.genesisBlock = {
   difficulty: config.difficultyDefault
   comment: 'we will craft citadels in the clouds or bury vaults within the ashes.'
 }
+
+if !module.parent
+  console.log JSON.stringify config, null, 2
 
 module.exports = config
 

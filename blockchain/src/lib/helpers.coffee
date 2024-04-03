@@ -35,6 +35,9 @@ lib.base_operation = (operation = 'encode', model = 58, data) -> (
   client[operation](data)
 )
 
+lib.sleep = (ms) -> new Promise (resolve, reject) ->
+  setTimeout resolve, ms
+
 lib.base_encode = (model, data) ->
   if !data and model
     data = model
@@ -113,9 +116,13 @@ lib.createHash = (val, opt = {}) ->
     return lib.sha256(val)
 
   if opt.type is 'scrypt'
-    return scrypt(val, '', { N: 1024, r: 8, p: 1, dkLen: 32, outputBuffer: opt.outputBuffer })
+    hashUintArr = scrypt(val, '', { N: 1024, r: 8, p: 1, dkLen: 32 })
+    return lib.createHash(Buffer.from(hashUintArr).toString('hex'), 'sha')
 
   if opt.type is 'bolthash'
+    bolthash_str = bolthash val
+    return lib.createHash(bolthashStr, 'sha')
+
     return bolthash val
 
   throw new Error 'Invalid `opt.type`'
@@ -216,8 +223,8 @@ lib.calculateBlockDifficulty = (blockchainId, blockHeight = 0) ->
       $lte: blockHeight
     }
 
-  diffBlocks = await Block 
-    .find(query,{ctime:1,time_elapsed:1,difficulty:1})
+  diffBlocks = await Block
+    .find(query,{ ctime: 1, time_elapsed: 1, difficulty: 1 })
     .sort(_id:-1)
     .limit(config.difficultyChangeBlockConsideration)
     .lean()
@@ -228,7 +235,7 @@ lib.calculateBlockDifficulty = (blockchainId, blockHeight = 0) ->
   currentDifficulty = _.first(diffBlocks)?.difficulty ? config.difficultyDefault
 
   averageElapsed = _.map diffBlocks, (x) -> x.time_elapsed
-  averageElapsed = _.ceil median averageElapsed
+  averageElapsed = _.ceil lib.median averageElapsed
 
   if currentDifficulty < config.difficultyDefault
     currentDifficulty = config.difficultyDefault

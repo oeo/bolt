@@ -1,22 +1,21 @@
 # bolt
-<img src="assets/bolt-reverse.svg" height="85" align="left" />
+<img src="assets/bolt-reverse.svg" height="125" align="left" />
 bolt is a censorship-resistant, distributed proof-of-work blockchain designed 
 to have bitcoin's best characteristics. The blockchain is built using using 
-coffeescript and leverages it's [custom hashing function](../hash/rust) for 
+coffeescript and leverages it's [custom hashing function](bolthash/rust) for 
 balanced performance between cpu and gpu mining. miners are rewarded in bolt,
 the native currency of the chain.
 
+the source of the chain itself and more information regarding it can be
+found here in [blockchain/](blockchain).
+
 ## features
 
-- **censorship resistance**: bolt allows for immutable data posting, making it resistant to censorship.
 - **custom hashing function**: designed to attempt to provide similar performance between cpu and gpu mining.
 - **native currency**: bolt has its native currency for rewarding miners.
-- **bitcoin characteristics**: the blockchain is designed to inherit bitcoin's characteristics.
-
-## fair distribution
-bolt intends to launch with a fair distribution and without a premine or fundraising.
-the block time and issuance schedule is designed to follow roughly the 
-schedule and behviour of bitcoin.
+- **bitcoin in sprit**: the blockchain is designed to inherit bitcoin's best characteristics, including.
+  - automatic difficulty adjustments and target block times.
+  - fixed supply cap and decreasing issuance of block rewards.
 
 ### structure
 
@@ -26,9 +25,9 @@ schedule and behviour of bitcoin.
   - note: this is ported to other language libraries like webasm for browsers and node.js for non-web node applications. examples are provided for each.
 
 ## @todo
-- `wallet/`: contains different wallets for the project
-  - [ ] `browser-extension/`: browser extension wallet
-- `web/`: contains all web projects
+- `wallet/`: contains different wallets for the project.
+  - [ ] `browser-extension/`: browser extension wallet.
+- `web/`: contains all web projects.
   - [ ] `explorer/`: contains a react-based block explorer.
   - [ ] `homepage/`: contains the homepage for bolt.
 
@@ -36,14 +35,11 @@ schedule and behviour of bitcoin.
 
 ## fair distribution
 bolt intends to launch with a fair distribution and without a premine and
-without fundraising, although there may be an airdrop to existing bitcoin
-wallets.
+without fundraising.
 
 the configured block time and issuance schedule is designed to follow 
 roughly the schedule and behviour of bitcoin. at the very least the features of 
-digital scarcity and proof of work will remain constant. however, we do reserve
-the rights the play with new features such as our own smart contract language and
-logic, utilizing different hashing algorythms, and so on. if the community of
-nodes accepts our changes they will be implemented. if not, then i suppose
-we fell short in some way. it's a real organic dao!
+digital scarcity and proof of work will remain constant. however, i'll reserve
+the right the play with modern features such as a smart contract language, 
+different hashing algos, and so on prior to launch.
 

@@ -11,3 +11,4 @@ SequenceSchema = new mongoose.Schema
 
 Sequence = mongoose.model 'Sequence', SequenceSchema
 module.exports = Sequence
+

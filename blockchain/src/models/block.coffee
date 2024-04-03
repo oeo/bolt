@@ -5,6 +5,7 @@ mongoose = require 'mongoose'
 { Transaction, TransactionSchema } = require './transaction'
 
 merkle = require './../lib/merkle'
+helpers = require './../lib/helpers'
 
 {
   time,
@@ -72,7 +73,7 @@ BlockSchema = new mongoose.Schema({
     default: -> time()
   }
 
-}, {versionKey:false,strict:true})
+}, { versionKey: false, strict: true })
 
 maxTarget = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF')
 getTargetForDifficulty = (difficulty) -> maxTarget / BigInt(difficulty)
@@ -83,8 +84,8 @@ BlockSchema.pre 'save', (next) ->
     return next new Error 'Block is not valid'
 
   lastBlock = await Block
-    .findOne({blockchain:@blockchain})
-    .sort({_id:-1})
+    .findOne({ blockchain: @blockchain })
+    .sort({ _id: -1 })
     .limit(1)
 
   if lastBlock
@@ -104,7 +105,7 @@ BlockSchema.post 'save', (doc) ->
   }
 
   await mongoose.model('Blockchain')
-    .updateOne {_id: doc.blockchain}
+    .updateOne { _id: doc.blockchain }
     .set {
       height: doc._id
       difficulty: doc.difficulty
@@ -122,19 +123,16 @@ BlockSchema.methods.calculateHash = (returnString = false) ->
     "#{@nonce}"
   ].join('')
 
-  hashBuf = createHash(str, {
+  hashStr = createHash(str, {
     type: config.algo
   })
 
-  hashBigInt = BigInt("0x#{Buffer.from(hashBuf).toString('hex')}")
+  hashBigInt = BigInt("0x#{hashStr}")
 
-  if returnString
-    return Buffer.from(hashBuf).toString('hex')
-  else
-    return {hashBuf, hashBigInt}
+  return {hashStr, hashBigInt}
 
 BlockSchema.methods.calculateBlockDifficulty = (height = 0) ->
-  return await calculateBlockDifficulty(@blockchain,height)
+  return await calculateBlockDifficulty(@blockchain, height)
 
 BlockSchema.methods.calculateBlockReward = (height = 0) ->
   return await calculateBlockReward(height)
@@ -144,18 +142,16 @@ BlockSchema.methods.isValid = ->
 
   # check hash 
   target = getTargetForDifficulty(@difficulty)
-  {hashBuf, hashBigInt} = await @calculateHash()
+  {hashStr, hashBigInt} = await @calculateHash()
 
-  recomputedHash = Buffer.from(hashBuf).toString('hex')
-
-  if recomputedHash isnt @hash
+  if hashStr isnt @hash
     return new Error '`hash` invalid'
 
   hashValid = hashBigInt < target
   return new Error('`hashBigInt` invalid (too small)') if !hashValid
 
-  # check difficulty 
-  if @difficulty isnt (await calculateBlockDifficulty(@blockchain,@_id))
+  # Check difficulty 
+  if @difficulty isnt (await calculateBlockDifficulty(@blockchain, @_id))
     return new Error '`difficulty` invalid'
 
   # check reward 
@@ -174,11 +170,10 @@ BlockSchema.methods.isValid = ->
 BlockSchema.methods.xmine = (->
   _mine = () =>
     target = getTargetForDifficulty(@difficulty)
-    { hashBuf, hashBigInt } = await @calculateHash()
+    { hashStr, hashBigInt } = await @calculateHash()
 
     if hashBigInt < target
-      @hash = Buffer.from(hashBuf).toString('hex')
-      return @hash
+      return @hashStr
     else
       @nonce = @nonce + 1
       _mine()
@@ -198,9 +193,6 @@ BlockSchema.methods.mine = ->
         miningCanceled = true
         resolve()
 
-  delay = (ms) ->
-    new Promise (resolve) -> setTimeout resolve, ms
-
   # Convert the recursive mining function to a while loop
   _mine = =>
     target = getTargetForDifficulty(@difficulty)
@@ -208,15 +200,15 @@ BlockSchema.methods.mine = ->
 
     while not miningCanceled
       for i in [1..iterationsBeforeCheckingCancel] by 1
-        {hashBuf, hashBigInt} = await @calculateHash()
+        {hashStr, hashBigInt} = await @calculateHash()
 
         if hashBigInt < target
-          @hash = Buffer.from(hashBuf).toString('hex')
+          @hash = hashStr
           return @hash
         else
           @nonce = @nonce + 1
 
-      await Promise.race([delay(50), cancelMining])
+      await Promise.race([helpers.sleep(50), cancelMining])
 
     return null
 

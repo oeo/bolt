@@ -90,12 +90,12 @@ class Wallet
     tmp.address = createHash tmp.publicKey
     tmp.address = tmp.address.substr 0, 34
 
-    tmp.address58 = 'bolt' + base_encode(58, tmp.address)
+    tmp.addressShort = 'bolt' + base_encode(58, tmp.address)
     tmp.address = 'bolt' + tmp.address
 
     tmp.addresses = [
       tmp.address
-      tmp.address58
+      tmp.addressShort
     ]
 
     return tmp
@@ -164,7 +164,7 @@ class Wallet
         mempoolDebt: await @_blockchain.getMempoolDebt(@address)
       }
 
-  # check if address is valid
+  # Check if address is valid
   isValidAddress: (address) ->
     addressRegex = /^bolt[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{22,34}$/
     return addressRegex.test(address)
@@ -185,7 +185,7 @@ if !module.parent
     count: 5
   })
 
-  # create a new wallet using the last generated child address
+  # Create a new wallet using the last generated child address
   walletChild = new Wallet(
     privateKey: _.last(addresses).privateKey
   )
@@ -209,7 +209,7 @@ if !module.parent
 
   # Create a wallet with a custom derivation path
   derivationPath = 'm/44h/0h/0h'
-  wallet4 = new Wallet({ prefix: 'b', path: derivationPath })
+  wallet4 = new Wallet({ path: derivationPath })
 
   log 'Wallet 4:'
   log JSON.stringify wallet4, null, 2

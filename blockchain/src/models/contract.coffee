@@ -7,7 +7,7 @@ Wallet = require './../lib/wallet'
 
 {
   time,
-  sha256,
+  createHash,
   indentedJSON,
   isObject,
 } = require './../lib/helpers'
@@ -24,7 +24,9 @@ ContractSchema = new mongoose.Schema({
     type: String
     required: true
     unique: true
-    default: -> (new Wallet(null,null,'c_').address)
+    default: -> (new Wallet({
+
+    }).address)
   }
 
   code: {
@@ -48,14 +50,14 @@ ContractSchema = new mongoose.Schema({
     default: -> time()
   }
 
-},{versionKey:false,strict:true})
+},{ versionKey:false, strict:true })
 
 ContractSchema.pre 'save', (next) ->
   next()
 
 ContractSchema.methods.log = (x...) ->
   x.unshift('contract-' + @_id.blue)
-  log x... 
+  log x...
 
 ContractSchema.methods.getBalance = ->
   blockchain = await Blockchain.findOne _id:@blockchain
@@ -68,6 +70,6 @@ ContractSchema.methods.executeFunction = (fnName, args) ->
   # 4. Save the updated state to the database 
   return true
 
-##
-Contract = mongoose.model 'Contract', ContractSchema 
-module.exports = Contract 
+Contract = mongoose.model 'Contract', ContractSchema
+module.exports = Contract
+

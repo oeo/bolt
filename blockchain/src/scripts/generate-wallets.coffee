@@ -31,4 +31,4 @@ for x in names
   wallets.push json
 
 log JSON.stringify(wallets,null,2)
-
+exit 0

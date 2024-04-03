@@ -18,7 +18,7 @@ walletJSON = JSON.parse(walletJSON)
 wallets = {}
 
 for item in walletJSON
-  wallets[item.name] = new Wallet(item.mnemonic)
+  wallets[item.name] = new Wallet({ seed: item.mnemonic })
   wallets[item.name].use(blockchain)
 
 log 'Created wallets', _.keys(wallets)

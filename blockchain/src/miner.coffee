@@ -18,7 +18,7 @@ await blockchain.sync()
 
 ora.succeed('Finished syncing blockchain data')
 
-ora.start('Creating wallets from ./data/test-wallets.json') 
+ora.start('Creating wallets from ./data/test-wallets.json')
 
 # create wallets
 wallets = {}
@@ -27,7 +27,7 @@ walletJSON = require('fs').readFileSync('./data/test-wallets.json')
 walletJSON = JSON.parse(walletJSON)
 
 for item in walletJSON
-  wallets[item.name] = new Wallet(item.mnemonic)
+  wallets[item.name] = new Wallet({ seed: item.mnemonic })
   wallets[item.name].use(blockchain)
 
 ora.succeed('Finished loading wallets')
@@ -41,10 +41,11 @@ while 1
   ora.start 'Mining block #' + nextBlock._id + ' (difficulty: ' + nextBlock.difficulty + ')'
 
   if solvedHash = await nextBlock.mine()
+    log /solvedHash/, solvedHash
 
     lastBlock = await Block
-      .findOne({blockchain: nextBlock.blockchain})
-      .sort({_id:-1})
+      .findOne({ blockchain: nextBlock.blockchain })
+      .sort({ _id: -1 })
       .limit(1)
 
     if lastBlock?._id and lastBlock._id + 1 isnt nextBlock._id
@@ -53,9 +54,13 @@ while 1
     nextBlock.hash = solvedHash
 
     try
-      if await nextBlock.isValid()
+      isValid = await nextBlock.isValid()
+      log /isValid/, isValid
+      if isValid
         if success = await nextBlock.save()
           blockReward = _.find(success.transactions,{comment:'block_reward',from:null})
           ora.succeed 'Mined block #' + nextBlock._id + ' (difficulty: ' + success.difficulty + ')' + ' (' + (time() - start) + 's)' 
           if blockReward then log "> #{JSON.stringify(_.pick(blockReward,['amount','to']))}".grey
+        else
+          log /no success/
 

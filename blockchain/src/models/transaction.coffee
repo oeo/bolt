@@ -14,26 +14,26 @@ TransactionSchema = new mongoose.Schema({
     default: -> @calculateHash()
   }
 
-  from: {type:String} 
-  to: {type:String,required:true}
+  from: { type: String }
+  to: { type: String, required:true }
 
-  contractFn: {type:String,default:null} 
+  contractFn: { type:String, default:null }
   contractArgs: [{
     type: mongoose.Schema.Types.Mixed
     default: []
-  }] 
+  }]
 
   fee: {
     type: Number
     default: config.minFee
     validate: {
       validator: (val) ->
-        if !this.from then return true 
+        if !this.from then return true
         if val < config.minFee then return false
     }
   }
 
-  amount: {type:Number,default:0}
+  amount: { type: Number, default: 0 }
 
   comment: {
     type: String
@@ -41,15 +41,15 @@ TransactionSchema = new mongoose.Schema({
     maxLength: config.maxTransactionCommentSize
   }
 
-  publicKey: String 
-  signature: String 
+  publicKey: String
+  signature: String
 
   ctime: {
     type: Number
     default: -> time()
   }
 
-}, {versionKey:false})
+}, { versionKey: false })
 
 TransactionSchema.methods.calculateHash = ->
   return sha256([
@@ -60,7 +60,7 @@ TransactionSchema.methods.calculateHash = ->
     @amount
     @fee
     @comment
-  ].join('')) 
+  ].join(''))
 
 TransactionSchema.methods.isValid = ->
   keyPair = ec.keyFromPublic(@publicKey, 'hex')
@@ -72,3 +72,4 @@ TransactionSchema.methods.isValid = ->
 
 Transaction = mongoose.model 'Transaction', TransactionSchema
 module.exports = {Transaction, TransactionSchema}
+

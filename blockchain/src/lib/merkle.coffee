@@ -1,4 +1,8 @@
+config = require './globals'
+
 crypto = require 'crypto'
+
+{ createHash } = require './helpers'
 
 module.exports = merkle_hash = (array) ->
   if !Array.isArray(array)
@@ -8,10 +12,17 @@ module.exports = merkle_hash = (array) ->
     return ''
 
   obj = {}
+
   for i in [0...array.length]
     hash = crypto.createHash('sha256')
-                 .update(JSON.stringify(array[i]))
-                 .digest('hex')
+      .update(JSON.stringify(array[i]))
+      .digest('hex')
+
+    hash = createHash(
+      JSON.stringify(array[i]),
+      { type: config.algo }
+    )
+
     obj[hash] = array[i]
 
   if Object.keys(obj).length == 1
@@ -31,7 +42,11 @@ module.exports = merkle_hash = (array) ->
       pairs.push(pair)
 
     hashes = pairs.map((pair) ->
-      crypto.createHash('sha256').update(pair).digest('hex'))
+      createHash(
+        pair,
+        { type: config.algo }
+      )
+    )
 
     keys = pairs
     values = hashes
@@ -40,8 +55,9 @@ module.exports = merkle_hash = (array) ->
 
 if !module.parent
   arr = [
-    {to:'bob',from:'fred',amount:20}
-    {to:'fred',from:'john',amount:50}
+    { to: 'bob', from: 'fred', amount: 20 }
+    { to: 'fred', from: 'john', amount: 50 }
   ]
 
   console.log(merkle_hash(arr))
+

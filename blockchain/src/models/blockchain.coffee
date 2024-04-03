@@ -20,7 +20,7 @@ BlockchainSchema = new mongoose.Schema({
 
   default: {
     type: Boolean
-    default: false 
+    default: false
   }
 
   miningReward: {
@@ -42,13 +42,12 @@ BlockchainSchema = new mongoose.Schema({
     TransactionSchema
   ]
 
-  height: {type:Number,default:0},
+  height: { type: Number, default: 0 }
 
-  time_last_block: {type:Number,default:0}
+  time_last_block: { type: Number, default: 0 }
+  ctime: { type: Number, default: time() }
 
-  ctime: {type:Number,default:time()}
-
-},{versionKey:false,strict:true})
+},{ versionKey: false, strict: true })
 
 BlockchainSchema.post 'save', (doc) ->
   eve.emit 'blockchain_updated', {
@@ -58,7 +57,7 @@ BlockchainSchema.post 'save', (doc) ->
 
 BlockchainSchema.methods.log = (x...) ->
   x.unshift(@_id.blue)
-  log x... 
+  log x...
 
 BlockchainSchema.methods.sync = ->
   exists = await Blockchain.findOne _id:@_id
@@ -70,12 +69,12 @@ BlockchainSchema.methods.sync = ->
   }
 
   return @ if !genesisExists
-  return @ 
+  return @
 
 BlockchainSchema.methods.getLastBlock = (height=false) ->
   b = await Block
-    .findOne({blockchain:@_id})
-    .sort({_id:-1})
+    .findOne({ blockchain: @_id })
+    .sort({ _id: -1 })
     .limit(1)
 
   if !b
@@ -93,12 +92,12 @@ BlockchainSchema.methods.nextBlock = (minerWallet) ->
   transactions = []
 
   rewardTransaction = new Transaction {
-    to: minerWallet.address 
+    to: minerWallet.address
     from: null
     fee: 0
     amount: await calculateBlockReward(lastHeight + 1)
     comment: 'block_reward'
-    publicKey: minerWallet.publicKey 
+    publicKey: minerWallet.publicKey
   }
 
   mempool = (_.sortBy @mempool, (x) -> -x.fee)
@@ -108,16 +107,16 @@ BlockchainSchema.methods.nextBlock = (minerWallet) ->
 
   if mempool?.length
     for transaction in mempool
-      t = new Transaction(transaction) 
+      t = new Transaction(transaction)
       transactions.push t
 
       break if transactions.length > maxTxns
 
-  transactions.unshift(rewardTransaction) 
+  transactions.unshift(rewardTransaction)
 
   if lastBlock
     newBlock = new Block {
-      _id: lastHeight + 1 
+      _id: lastHeight + 1
       blockchain: @_id
       transactions: transactions
       comment: null
@@ -127,7 +126,7 @@ BlockchainSchema.methods.nextBlock = (minerWallet) ->
     }
 
   else
-    genesis = _.clone(config.genesisBlock) 
+    genesis = _.clone(config.genesisBlock)
     newBlock = new Block(genesis)
 
   return newBlock
@@ -142,7 +141,7 @@ BlockchainSchema.methods.addressBalance = (address,includeMempool=false) ->
       { 'transactions.to': address }
       { 'transactions.from': address }
     ]
-  },{transactions:1}).sort({_id:1})
+  },{ transactions: 1 }).sort({ _id: 1 })
 
   balance = 0
 
@@ -166,12 +165,11 @@ BlockchainSchema.methods.addressBalance = (address,includeMempool=false) ->
     if t.from is address
       result.mempoolDebt -= (t.amount - t.fee)
 
-  result.balanceCalculated = 
+  result.balanceCalculated =
     (result.onChain + result.mempoolCredit - result.mempoolDebt)
 
   return result
 
-
-##
-Blockchain = mongoose.model 'Blockchain', BlockchainSchema 
+Blockchain = mongoose.model 'Blockchain', BlockchainSchema
 module.exports = Blockchain
+
