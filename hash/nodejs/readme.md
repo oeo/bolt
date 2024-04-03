@@ -1,5 +1,10 @@
 # node-addon
 
+## rebuild
+```bash
+neon build
+```
+
 ## usage
 
 ```coffeescript
@@ -14,5 +19,4 @@ console.log boltHash('hello, world')
 # 706dab3f7f7ab95f4c5b3d9e900257a922eb1ba73e6777647e22d421fd4c76bd13c9149f3f933fe93fc39f7fda0598319ed98eeb2ea48d91ab096e747b1cdc51
 
 ```
-
 

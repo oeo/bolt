@@ -16,4 +16,4 @@ neon-build = "0.10.1"
 
 [dependencies]
 neon = "0.10.1"
-bolt_hash_rust = { path = "../../rust" }
+bolt_hash = { path = "../../rust" }

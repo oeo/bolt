@@ -22,7 +22,8 @@ pub fn custom_hash(input: &[u8]) -> String {
     }
 
     let final_hash = Blake2b512::digest(&memory);
-    // Convert the final hash to a hexadecimal string
+
+    // convert to a hexadecimal string, return
     final_hash.iter().map(|byte| format!("{:02x}", byte)).collect()
 }
 

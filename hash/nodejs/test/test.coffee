@@ -2,7 +2,7 @@
 { log } = console
 { exit } = process
 
-boltHash = require('../native')
+boltHash = require(__dirname + '/../native')
 
 log boltHash.encode('hello, world')
 

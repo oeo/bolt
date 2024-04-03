@@ -30,7 +30,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "bolt_hash_rust"
+name = "bolt_hash"
 version = "0.1.0"
 dependencies = [
  "blake2",
@@ -149,7 +149,7 @@ dependencies = [
 name = "node-addon"
 version = "0.1.0"
 dependencies = [
- "bolt_hash_rust",
+ "bolt_hash",
  "neon",
  "neon-build",
 ]

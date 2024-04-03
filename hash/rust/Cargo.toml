@@ -1,10 +1,10 @@
 [package]
-name = "bolt_hash_rust"
+name = "bolt_hash"
 version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "bolt_hash_rust"
+name = "bolt_hash"
 crate-type = ["cdylib", "rlib"]
 path = "src/lib.rs"
 
