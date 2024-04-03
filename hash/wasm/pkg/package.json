@@ -1,0 +1,14 @@
+{
+  "name": "bolt_hash_wasm",
+  "version": "0.1.0",
+  "files": [
+    "bolt_hash_wasm_bg.wasm",
+    "bolt_hash_wasm.js",
+    "bolt_hash_wasm.d.ts"
+  ],
+  "module": "bolt_hash_wasm.js",
+  "types": "bolt_hash_wasm.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
