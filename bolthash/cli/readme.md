@@ -1,7 +1,7 @@
-# bolthash
+# bolthash-cli
 
-this application uses `bolt_hash` to convert strings into hashes. `bolthash`
-follows the behavior of traditional unix programs.
+this application uses the rust bolthash library to convert strings into hashes. 
+`bolthash` follows the behavior of traditional unix programs.
 
 ## usage
 
