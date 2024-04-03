@@ -1,0 +1,14 @@
+{
+  "name": "node-addon",
+  "version": "0.1.0",
+  "description": "",
+  "main": "lib/index.js",
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "neon-cli": "^0.10.1"
+  },
+  "scripts": {
+    "install": "neon build"
+  }
+}

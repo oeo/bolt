@@ -1,11 +1,13 @@
 [package]
-name = "bolt_hash"
+name = "bolt_hash_rust"
 version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "custom_hash"
+name = "bolt_hash_rust"
 crate-type = ["cdylib", "rlib"]
+path = "src/lib.rs"
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
