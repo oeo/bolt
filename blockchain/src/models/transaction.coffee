@@ -71,5 +71,4 @@ TransactionSchema.methods.isValid = ->
   return keyPair.verify(@calculateHash(), @signature)
 
 Transaction = mongoose.model 'Transaction', TransactionSchema
-module.exports = {Transaction, TransactionSchema}
-
+module.exports = { Transaction, TransactionSchema }

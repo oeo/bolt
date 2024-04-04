@@ -2,10 +2,10 @@ VERSION = 'furious-fish'
 STAGING = true
 
 config = {
-  version: VERSION
-  apiVersion: 1
-
   package: pkg = require(__dirname + '/../package.json')
+
+  versionName: VERSION
+  apiVersion: pkg.version
 
   staging: false
 

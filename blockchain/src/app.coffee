@@ -1,5 +1,7 @@
 config = require './lib/globals'
 
+exec = { process }
+
 express = require 'express'
 bodyParser = require 'body-parser'
 morgan = require 'morgan'
@@ -28,7 +30,6 @@ statsRoutes = require './routes/stats'
 # Setup versioned API
 apiRouterV1 = express.Router()
 app.use '/api/v1', apiRouterV1
-
 apiRouterV1.use '/blockchain', blockchainRoutes
 apiRouterV1.use '/transactions', transactionsRoutes
 apiRouterV1.use '/wallets', walletsRoutes
@@ -49,9 +50,10 @@ main = (->
   bulk =  require('fs').readFileSync(__dirname + '/../.ascii.art','utf8')
 
   lines = _.map bulk.split('\n'), (line) ->
+
     line = line.split('_algo_').join(config.algo)
     line = line.split('_version_').join(config.package.version)
-    line = line.split('_name_').join(config.package.version)
+    line = line.split('_versionName_').join(config.versionName)
 
     while line.length < (maxLen = 44)
       line += ' '
@@ -79,6 +81,5 @@ main = (->
     log "listening on port #{config.ports.http}"
 )
 
-# Start the node
 main()
 

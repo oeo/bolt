@@ -215,7 +215,7 @@ lib.calculateBlockDifficulty = (blockchainId, blockHeight = 0) ->
   Block = require './../models/block'
 
   query = {
-    blockchain: blockchainId 
+    blockchain: blockchainId
   }
 
   if blockHeight
