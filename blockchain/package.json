@@ -29,6 +29,7 @@
     "monero-javascript": "^0.7.7",
     "mongoose": "^7.3.3",
     "mongoose-sequence": "^5.3.1",
+    "morgan": "^1.10.0",
     "ora": "^6.3.0",
     "peer": "^1.0.0",
     "pino": "^8.11.0",

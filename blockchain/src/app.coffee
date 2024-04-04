@@ -1,5 +1,4 @@
-config = require './../../src/lib/globals'
-log './../src/lib/globals'
+config = require './lib/globals'
 
 express = require 'express'
 bodyParser = require 'body-parser'
@@ -28,7 +27,7 @@ statsRoutes = require './routes/stats'
 
 # Setup versioned API
 apiRouterV1 = express.Router()
-app.use '/api/v1', apiRouter
+app.use '/api/v1', apiRouterV1
 
 apiRouterV1.use '/blockchain', blockchainRoutes
 apiRouterV1.use '/transactions', transactionsRoutes
@@ -43,19 +42,18 @@ app.use (err, req, res, next) ->
   console.error err.stack
   res.status(500).json({ error: 'Internal Server Error' })
 
-# Start the server
-app.listen config.ports.http, () ->
-  console.log "Bolt Node API server is running on port #{config.ports.http}"
-
-# Initialize the blockchain and other necessary components
-initializeNode = () ->
-  log 'Initializing Bolt Node...'
-
 # Graceful shutdown handling
-require('process').on () ->
+require('process').on 'exit', ->
   # @todo: Perform any necessary cleanup tasks before exiting
   process.exit()
 
+main = (->
+  log 'Initializing Bolt Node...'
+
+  app.listen config.ports.http, ->
+    log "Bolt Node API server is running on port #{config.ports.http}"
+)
+
 # Start the node
-initializeNode()
+main()
 

@@ -1,9 +1,9 @@
 # vim: set expandtab tabstop=2 shiftwidth=2 softtabstop=2
-config = require './../../lib/globals'
+config = require './../lib/globals'
 
 module.exports = router = require('express').Router()
 
-Wallet = require './../models/wallets'
+Wallet = require './../lib/wallet'
 
 router.post "/wallets/create", ((req, res, next) ->
   w = new Wallet(req.body ? {})
