@@ -3,7 +3,7 @@ config = require './lib/globals'
 _ora = (await import('ora')).default
 ora = _ora()
 
-{time} = require './lib/helpers'
+{ time } = require './lib/helpers'
 
 Wallet = require './lib/wallet'
 Block = require './models/block'
@@ -41,12 +41,10 @@ while 1
   ora.start 'Mining block #' + nextBlock._id + ' (difficulty: ' + nextBlock.difficulty + ')'
 
   if solvedHash = await nextBlock.mine()
-    log /solvedHash/, solvedHash
-
     lastBlock = await Block
       .findOne({ blockchain: nextBlock.blockchain })
       .sort({ _id: -1 })
-      .limit(1)
+      .limit 1
 
     if lastBlock?._id and lastBlock._id + 1 isnt nextBlock._id
       continue
@@ -55,12 +53,9 @@ while 1
 
     try
       isValid = await nextBlock.isValid()
-      log /isValid/, isValid
       if isValid
         if success = await nextBlock.save()
           blockReward = _.find(success.transactions,{comment:'block_reward',from:null})
           ora.succeed 'Mined block #' + nextBlock._id + ' (difficulty: ' + success.difficulty + ')' + ' (' + (time() - start) + 's)' 
           if blockReward then log "> #{JSON.stringify(_.pick(blockReward,['amount','to']))}".grey
-        else
-          log /no success/
 

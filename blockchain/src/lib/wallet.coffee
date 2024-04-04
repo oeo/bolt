@@ -23,7 +23,7 @@ class Wallet
       seedPhrase: opt.seed ? null
       privateKeyString: opt.privateKey ? null
       addressPrefix: opt.prefix ? 'b'
-      derivationPath: opt.path ? null
+      derivationPath: opt.path ? config.derivationPath ? null
     }
 
     for k,v of defaults
@@ -100,7 +100,6 @@ class Wallet
 
     return tmp
 
-  # New method to generate multiple addresses without altering the wallet's state
   createAddresses: (opt = {
     account: 0
     change: 0
@@ -108,10 +107,10 @@ class Wallet
     indexStart: 0
   }) ->
     defaults = {
-      account: opt.account
-      change: opt.change
-      count: 10
-      indexStart: 0
+      account: opt.account ? 0
+      change: opt.change ? 0
+      count: opt.count ? 10
+      indexStart: opt.indexStart ? 0
     }
 
     for k,v of defaults
@@ -125,21 +124,17 @@ class Wallet
         change: opt.change,
         index: index
       }
-
       derivedKey = @hdwallet.derive(path)
-
       keyPair = new ec.ec('secp256k1').keyFromPrivate(derivedKey.privateKey.toString('hex'))
       keyInfo = @getKeyInfo keyPair
-
       addr = keyInfo
       addr.path = path
-
       addresses.push addr
 
     return addresses
 
   signTransaction: (transaction) ->
-    if transaction.fromAddress !in @address
+    if transaction.fromAddress !in @addresses
       throw new Error 'Cannot sign transactions for other wallets'
 
     hash = transaction.calculateHash()
@@ -148,6 +143,7 @@ class Wallet
     transaction.sign(signature)
 
     return transaction
+
 
   getBalance: (includeMempool = false) ->
     if !@_blockchain
@@ -166,8 +162,10 @@ class Wallet
 
   # Check if address is valid
   isValidAddress: (address) ->
-    addressRegex = /^bolt[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{22,34}$/
-    return addressRegex.test(address)
+    if address.startsWith('bold')
+      address = address.substr(0, 4)
+    addressRegex = /[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{22,34}$/
+    addressRegex.test(address)
 
 module.exports = Wallet
 

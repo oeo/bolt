@@ -3,8 +3,21 @@ STAGING = true
 
 config = {
   version: VERSION
+  apiVersion: 1
+
+  package: pkg = require(__dirname + '/../package.json')
+  packageVersion: pkg.version
+
   staging: false
-  algo: 'scrypt' # valid: [sha or sha256, scrypt, bolthash]
+
+  #
+  # @note: "bolthash" will soon be available once we format the output
+  # to be comparable to sha so it can come up with similar outputs
+  #
+  # @valid: sha256, scrypt
+  #
+  algo: 'scrypt'
+
   minFee: 0.0001
   maxBlockSize: 1024 * 1024
   maxContractStateSize: 1024 * 1024
@@ -21,7 +34,7 @@ config = {
   difficultyChangeBlockConsideration: 3
   confirmations: 6
 
-  # `m/84h/779h/0h/0h`
+  # m/84h/779h/0h/0h
   # https://github.com/satoshilabs/slips/blob/master/slip-0044.md
   derivation: {
     purpose: 84
