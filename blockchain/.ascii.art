@@ -1,8 +1,6 @@
-  /   /    \   /
-  \  /      \  /
+  /   /    \  /
+  \  /\     \/
   /   /\   /
-  \  /  \  / bolt 
-  /    /
-  \    /
-  \  /
-  /
+  \  /  \ /  🔺 bolt v_package.version_
+  /     /    algo _algo_               
+   \  /      apiv _apiVersion_
