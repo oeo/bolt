@@ -48,10 +48,24 @@ require('process').on 'exit', ->
   process.exit()
 
 main = (->
-  log 'Initializing Bolt Node...'
+  bulk =  require('fs').readFileSync(__dirname + '/../.ascii.art','utf8')
+
+  lines = _.map bulk.split('\n'), (line) ->
+    line = line.split('_algo_').join(config.algo)
+    line = line.split('_package.version_').join(config.package.version)
+    line = line.split('_apiVersion_').join(config.apiVersion)
+
+    line
+
+  bulk = lines.join '\n'
+  bulk = bulk.inverse
+
+  log bulk
+
+  log 'initializing bolt node'.inverse.info
 
   app.listen config.ports.http, ->
-    log "Bolt Node API server is running on port #{config.ports.http}"
+    log "listening on port #{config.ports.http}"
 )
 
 # Start the node

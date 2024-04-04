@@ -6,7 +6,6 @@ config = {
   apiVersion: 1
 
   package: pkg = require(__dirname + '/../package.json')
-  packageVersion: pkg.version
 
   staging: false
 
