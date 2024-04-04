@@ -37,32 +37,43 @@ apiRouterV1.use '/network', networkRoutes
 apiRouterV1.use '/contracts', contractsRoutes
 apiRouterV1.use '/stats', statsRoutes
 
-# Error handling middleware
+# lmao lmfao
 app.use (err, req, res, next) ->
   console.error err.stack
   res.status(500).json({ error: 'Internal Server Error' })
 
-# Graceful shutdown handling
-require('process').on 'exit', ->
-  # @todo: Perform any necessary cleanup tasks before exiting
-  process.exit()
+# graceful shutdown handling
+require('process').on 'exit', process.exit
 
 main = (->
   bulk =  require('fs').readFileSync(__dirname + '/../.ascii.art','utf8')
 
   lines = _.map bulk.split('\n'), (line) ->
     line = line.split('_algo_').join(config.algo)
-    line = line.split('_package.version_').join(config.package.version)
-    line = line.split('_apiVersion_').join(config.apiVersion)
+    line = line.split('_version_').join(config.package.version)
+    line = line.split('_name_').join(config.package.version)
+
+    while line.length < (maxLen = 44)
+      line += ' '
+
+    while line.length > maxLen
+      line = line.substr(0, line.length - 1)
 
     line
 
   bulk = lines.join '\n'
-  bulk = bulk.inverse
 
-  log bulk
+  randomColor = _.sample [
+    colors.inverse.red
+    colors.inverse.yellow
+    colors.dim
+    colors.inverse.green
+    colors.inverse.blue
+  ]
 
-  log 'initializing bolt node'.inverse.info
+  log randomColor(bulk)
+
+  log 'initializing bolt node'
 
   app.listen config.ports.http, ->
     log "listening on port #{config.ports.http}"

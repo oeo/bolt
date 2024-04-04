@@ -1,5 +1,6 @@
 # vim: set expandtab tabstop=2 shiftwidth=2 softtabstop=2
 config = require './../lib/globals'
+
 module.exports = router = require('express').Router()
 
 router.get "/network/peers", ((req, res, next) ->
