@@ -1,4 +1,5 @@
-config = require './../lib/globals'
+config = require './../../src/lib/globals'
+log './../src/lib/globals'
 
 express = require 'express'
 bodyParser = require 'body-parser'
@@ -48,11 +49,10 @@ app.listen config.ports.http, () ->
 
 # Initialize the blockchain and other necessary components
 initializeNode = () ->
-  # @todo: Initialize the blockchain, connect to the database, start the P2P network, etc.
   log 'Initializing Bolt Node...'
 
 # Graceful shutdown handling
-process.on 'SIGINT', () ->
+require('process').on () ->
   # @todo: Perform any necessary cleanup tasks before exiting
   process.exit()
 
