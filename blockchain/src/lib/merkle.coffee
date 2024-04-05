@@ -14,10 +14,6 @@ module.exports = merkle_hash = (array) ->
   obj = {}
 
   for i in [0...array.length]
-    hash = crypto.createHash('sha256')
-      .update(JSON.stringify(array[i]))
-      .digest('hex')
-
     hash = createHash(
       JSON.stringify(array[i]),
       { type: config.algo }

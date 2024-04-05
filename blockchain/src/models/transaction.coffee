@@ -1,6 +1,6 @@
 config = require './../config'
 
-{timeBucket, sha256, uuid, time} = require './../lib/helpers'
+{ timeBucket, sha256, uuid, time } = require './../lib/helpers'
 
 mongoose = require 'mongoose'
 
@@ -72,3 +72,4 @@ TransactionSchema.methods.isValid = ->
 
 Transaction = mongoose.model 'Transaction', TransactionSchema
 module.exports = { Transaction, TransactionSchema }
+

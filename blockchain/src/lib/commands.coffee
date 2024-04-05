@@ -14,28 +14,28 @@ module.exports.register = (commander) ->
   }
 
   # blockchain 
-  commands.chain 
+  commands.chain
     .command('info')
     .description('get info about the blockchain')
     .action () ->
       result = await Blockchain.findOne _id:config.version
-      log result 
+      log result
       exit 0
 
-  commands.chain 
-    .command('block <height>')
+  commands.chain
+    .command('block <height=0>')
     .description('get a block at a specific height')
-    .action (height) ->
+    .action (height = 0) ->
       result = await Block.findOne({
         blockchain: config.version
-        _id: +height 
+        _id: +height
       })
 
-      log result 
+      log result
       exit 0
 
   # wallet
-  commands.wallet 
+  commands.wallet
     .command('create')
     .description('create a new wallet')
     .option('-s, --seed [seed]', 'the seed phrase to generate wallet from')
@@ -45,7 +45,7 @@ module.exports.register = (commander) ->
       log wallet.toJSON()
       exit 0
 
-  commands.wallet 
+  commands.wallet
     .command('balance <address>')
     .description('get the balance of a wallet')
     .option('--include-mempool', 'include mempool transactions in the balance calculation')
@@ -60,8 +60,8 @@ module.exports.register = (commander) ->
       exit 0
 
   # config
-  commands.config 
+  commands.config
     .description('print configuration')
     .action ->
-      log config 
+      log config
       exit 0

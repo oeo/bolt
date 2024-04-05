@@ -1,8 +1,8 @@
      /    /                                     
      \  //
       \ \                 
-     /   \    ϟolt: _version_
-   ↯/ ↯ /     nick  _versionName_             
+     /   \       ϟ _version_
+   ↯/ ↯ /     name: _versionName_             
     \  /↯     hash: _algo_                            
      \|↯      
       v

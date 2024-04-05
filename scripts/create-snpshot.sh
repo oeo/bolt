@@ -1,1 +1,1 @@
-tree -I h"*node_modules*" -I "*yarn.lock*" -I "*target*" -I "*.wasm*.*" 
+tree ../blockchain -I "**node_modules**" -I "*yarn.lock*" -I "target/**" -I "*.wasm*.*" -I "release/**" -I "build/**"

@@ -120,9 +120,6 @@ lib.createHash = (val, opt = {}) ->
     return lib.createHash(Buffer.from(hashUintArr).toString('hex'), 'sha')
 
   if opt.type is 'bolthash'
-    bolthash_str = bolthash val
-    return lib.createHash(bolthashStr, 'sha')
-
     return bolthash val
 
   throw new Error 'Invalid `opt.type`'

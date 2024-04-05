@@ -11,7 +11,7 @@ class WasmHTTPRequestHandler(SimpleHTTPRequestHandler):
 if __name__ == '__main__':
     mimetypes.init()
     mimetypes.add_type('application/wasm', '.wasm')
-    PORT = 8000
+    PORT = 8001
     httpd = HTTPServer(('localhost', PORT), WasmHTTPRequestHandler)
     print(f"Serving at port {PORT}")
     httpd.serve_forever()

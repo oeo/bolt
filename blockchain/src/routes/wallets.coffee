@@ -3,14 +3,28 @@ config = require './../lib/globals'
 module.exports = router = require('express').Router()
 
 Wallet = require './../lib/wallet'
+Block = require '../models/block'
+Blockchain = require './../models/blockchain'
 
 router.post "/wallets/create", ((req, res, next) ->
-  w = new Wallet(req.body ? {})
-  return res.json(w.toJSON())
+  w = new Wallet {
+    seed: req.options.seed
+    privateKey: req.options.privateKey
+  }
+
+  return res.json w.toJSON()
 )
 
 router.get "/wallets/:address/balance", ((req, res, next) ->
   # Retrieve the balance of a specific wallet address
+  blockchain = new Blockchain()
+
+  result = await blockchain.addressBalance(
+    address,
+    req.options.includeMempool
+  )
+
+  return res.json result
 )
 
 router.get "/wallets/:address/transactions", ((req, res, next) ->
@@ -23,10 +37,6 @@ router.get "/wallets/:address/utxos", ((req, res, next) ->
 
 router.post "/wallets/:address/sign", ((req, res, next) ->
   # Sign a transaction using the private key associated with a specific wallet address
-)
-
-router.post "/wallets/import", ((req, res, next) ->
-  # Import a wallet using a private key or mnemonic phrase
 )
 
 router.get "/wallets/addresses", ((req, res, next) ->

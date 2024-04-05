@@ -7,6 +7,7 @@ bodyParser = require 'body-parser'
 morgan = require 'morgan'
 cors = require 'cors'
 compression = require 'compression'
+pino = require 'pino-http'
 
 app = express()
 app.disable 'x-powered-by'
@@ -17,6 +18,7 @@ app.use bodyParser.urlencoded({ extended: true })
 app.use morgan('dev')
 app.use cors()
 app.use compression()
+app.use pino()
 
 # Route files
 blockchainRoutes = require './routes/blockchain'
@@ -29,7 +31,7 @@ statsRoutes = require './routes/stats'
 
 # Setup versioned API
 apiRouterV1 = express.Router()
-app.use '/api/v1', apiRouterV1
+
 apiRouterV1.use '/blockchain', blockchainRoutes
 apiRouterV1.use '/transactions', transactionsRoutes
 apiRouterV1.use '/wallets', walletsRoutes
@@ -38,10 +40,12 @@ apiRouterV1.use '/network', networkRoutes
 apiRouterV1.use '/contracts', contractsRoutes
 apiRouterV1.use '/stats', statsRoutes
 
+app.use '/api/v1', apiRouterV1
+
 # lmao lmfao
 app.use (err, req, res, next) ->
   console.error err.stack
-  res.status(500).json({ error: 'Internal Server Error' })
+  res.status(500).json({ error: 500 })
 
 # graceful shutdown handling
 require('process').on 'exit', process.exit

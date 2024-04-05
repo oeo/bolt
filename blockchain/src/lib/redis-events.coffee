@@ -1,12 +1,12 @@
-IORedis = require 'ioredis'
+Redis = require 'ioredis'
 { EventEmitter } = require 'events'
 
 class DistributedEventEmitter extends EventEmitter
   constructor: (redisOptions) ->
     super()
 
-    @redisSubscriber = new IORedis(redisOptions)
-    @redisPublisher = new IORedis(redisOptions)
+    @redisSubscriber = new Redis(redisOptions)
+    @redisPublisher = new Redis(redisOptions)
 
     # Subscribe to a channel called 'events'
     @redisSubscriber.subscribe 'events'
@@ -23,3 +23,4 @@ class DistributedEventEmitter extends EventEmitter
     @redisPublisher.publish 'events', message
 
 module.exports = DistributedEventEmitter
+

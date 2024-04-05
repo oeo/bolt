@@ -1,20 +1,20 @@
 VERSION = 'furious-fish'
 STAGING = true
 
-config = {
-  package: pkg = require(__dirname + '/../package.json')
+_clone = (x) -> JSON.parse JSON.stringify(x)
 
+pkg = _clone(require(__dirname + '/../package.json'))
+try delete pkg.dependencies
+
+config = {
+  package: pkg
+
+  version: pkg.version
   versionName: VERSION
-  apiVersion: pkg.version
 
   staging: false
 
-  #
-  # @note: "bolthash" will soon be available once we format the output
-  # to be comparable to sha so it can come up with similar outputs
-  #
-  # @valid: sha256, scrypt, bolthash
-  #
+  # valid: [sha256, scrypt, bolthash]
   algo: 'bolthash'
 
   minFee: 0.0001
@@ -27,7 +27,7 @@ config = {
   rewardDefault: 50
   rewardHalvingInterval: 210000 # blocks
   blockInterval: 60 * 60 # 1hr 
-  difficultyDefault: 1000
+  difficultyDefault: 100
   difficultyChangePercent: 1
   difficultyChangePercentDrastic: 25
   difficultyChangeBlockConsideration: 3
@@ -55,13 +55,13 @@ config = {
 }
 
 configStaging = {
-  version: 'stage-' + config.version
+  version: pkg.version
   staging: true
   blockInterval: 10
   rewardHalvingInterval: 50
   storage: {
-    mongo: 'mongodb://127.0.0.1:27017/stage-' + config.version
-    redis: 'redis://127.0.0.1:6379/'
+    mongo: 'mongodb://127.0.0.1:27017/stage-' + VERSION
+    redis: 'redis://127.0.0.1:6379'
   }
 }
 

@@ -16,13 +16,11 @@ class Wallet
   constructor: (opt = {
     seedPhrase: null
     privateKeyString: null
-    addressPrefix: 'b'
     derivationPath: config.derivationPath
   }) ->
     defaults = {
       seedPhrase: opt.seed ? null
       privateKeyString: opt.privateKey ? null
-      addressPrefix: opt.prefix ? 'b'
       derivationPath: opt.path ? config.derivationPath ? null
     }
 
