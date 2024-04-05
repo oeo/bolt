@@ -2,12 +2,12 @@
 config = require __dirname + '/../lib/globals'
 helpers = require __dirname + '/../lib/helpers'
 
-await helpers.sleep 2000
+await helpers.sleep 1000
 
 result = await mongoose.connection.db.admin().listDatabases()
 
 testDbs = result.databases.filter (db) ->
-  if db.name.startsWith('stage-') then return true
+  if db.name.startsWith('boltstage-') then return true
   false
 
 mongoose.connection.close()

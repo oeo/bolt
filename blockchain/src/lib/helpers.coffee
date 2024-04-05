@@ -126,6 +126,7 @@ lib.createHash = (val, opt = {}) ->
 
 lib._confirm = (question, defaultResponse='Y', cb) ->
   readline = require 'readline'
+
   rl = readline.createInterface process.stdin, process.stdout
 
   if typeof(defaultResponse) is 'string'
@@ -144,9 +145,10 @@ lib._confirm = (question, defaultResponse='Y', cb) ->
   questionStr = [
     question,
     responseMarkup
-  ].join(' ').magenta
+  ].join(' ')
 
-  rl.question questionStr + ': ', (answer) ->
+  L questionStr + ': '
+  rl.question '', (answer) ->
     validYes = ['y','yes']
 
     if defaultBool

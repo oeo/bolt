@@ -55,7 +55,7 @@ for method in methods
   do (method) ->
     L[method] = (args...) ->
       callerFile = getCallerFile()
-      scope = callerFile.split('/src/').pop()
+      scope = callerFile.split('/').pop()
       logger = new Signale({ scope, config: signaleConfig })
       logger[method] args...
 

@@ -1,12 +1,13 @@
-STAGING = true
-
-_clone = (x) -> JSON.parse JSON.stringify(x)
+# @note: temporary override
+process.env.STAGING = true
 
 vers = require __dirname + '/lib/version'
 
 config = {
   package: vers.package
-  version: vers.info().versionInt
+
+  version: vers.package.version # ex: 0.1.13
+  versionInt: vers.package.versionInt # ex: 1013
 
   staging: false
 
@@ -43,6 +44,7 @@ config = {
     mongo: 'mongodb://127.0.0.1:27017/' + vers.info().prefixMongo
     redis: 'redis://127.0.0.1:6379/0'
     redisPrefix: vers.info().prefixRedis
+    mongoPrefix: vers.info().prefixMongo
   }
 
   ports: {
@@ -52,13 +54,12 @@ config = {
 }
 
 configStaging = {
-  version: vers.version
   staging: true
   blockInterval: 10
   rewardHalvingInterval: 50
 }
 
-if vers.info().staging
+if vers.info().staging or env.STAGING
   config[k] = v for k,v of configStaging
 
 config.genesisBlock = {
