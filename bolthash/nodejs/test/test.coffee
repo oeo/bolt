@@ -4,5 +4,5 @@
 
 boltHash = require(__dirname + '/../native')
 
-log boltHash.encode('hello, world')
+log boltHash.encode('hello world')
 

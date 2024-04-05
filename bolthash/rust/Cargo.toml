@@ -14,4 +14,5 @@ path = "src/lib.rs"
 [dependencies]
 blake2 = "0.10.0"
 rand = "0.8.5"
+hex = "0.4"
 

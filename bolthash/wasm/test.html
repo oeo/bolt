@@ -17,6 +17,12 @@
     // Initializes the wasm module once the page loads
     window.addEventListener('DOMContentLoaded', async (event) => {
       await init()
+
+      let val = null
+      let helloHash = await encode('hello world')
+
+      console.log(/helloHash/, helloHash)
+
       document.getElementById('inputText').addEventListener('input', async (event) => {
         const inputText = event.target.value; // Get the current value of the input
         const hash = await encode(inputText); // Hash the input
