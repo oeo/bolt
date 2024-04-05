@@ -1,16 +1,12 @@
-VERSION = 'furious-fish'
 STAGING = true
 
 _clone = (x) -> JSON.parse JSON.stringify(x)
 
-pkg = _clone(require(__dirname + '/../package.json'))
-try delete pkg.dependencies
+vers = require __dirname + '/lib/version'
 
 config = {
-  package: pkg
-
-  version: pkg.version
-  versionName: VERSION
+  package: vers.package
+  version: vers.info().versionInt
 
   staging: false
 
@@ -44,8 +40,9 @@ config = {
   }
 
   storage: {
-    mongo: 'mongodb://127.0.0.1:27017/prod-' + VERSION
-    redis: 'redis://127.0.0.1:6379/'
+    mongo: 'mongodb://127.0.0.1:27017/' + vers.info().prefixMongo
+    redis: 'redis://127.0.0.1:6379/0'
+    redisPrefix: vers.info().prefixRedis
   }
 
   ports: {
@@ -55,17 +52,13 @@ config = {
 }
 
 configStaging = {
-  version: pkg.version
+  version: vers.version
   staging: true
   blockInterval: 10
   rewardHalvingInterval: 50
-  storage: {
-    mongo: 'mongodb://127.0.0.1:27017/stage-' + VERSION
-    redis: 'redis://127.0.0.1:6379'
-  }
 }
 
-if STAGING
+if vers.info().staging
   config[k] = v for k,v of configStaging
 
 config.genesisBlock = {

@@ -10,8 +10,6 @@ global.env ?= process.env
 global.exit ?= process.exit
 
 global.L = (require './logger.coffee').L
-L 'we loaded baby'
-
 global._ ?= require 'lodash'
 
 global.mongoose ?= require 'mongoose'
@@ -23,5 +21,5 @@ global.redis = new Redis(config.storage.redis)
 reve = require './redis-events'
 global.eve ?= new reve(config.storage.redis)
 
-rlog = require './redis-logs'
+global.version = (require './version.coffee')
 

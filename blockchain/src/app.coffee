@@ -1,13 +1,10 @@
 config = require './lib/globals'
 
-exec = { process }
-
 express = require 'express'
-bodyParser = require 'body-parser'
-morgan = require 'morgan'
 cors = require 'cors'
+morgan = require 'morgan'
+bodyParser = require 'body-parser'
 compression = require 'compression'
-pino = require 'pino-http'
 
 app = express()
 app.disable 'x-powered-by'
@@ -18,7 +15,10 @@ app.use bodyParser.urlencoded({ extended: true })
 app.use morgan('dev')
 app.use cors()
 app.use compression()
-app.use pino()
+
+app.use ((req, res, next) ->
+  next()
+)
 
 # Route files
 blockchainRoutes = require './routes/blockchain'
@@ -40,6 +40,10 @@ apiRouterV1.use '/network', networkRoutes
 apiRouterV1.use '/contracts', contractsRoutes
 apiRouterV1.use '/stats', statsRoutes
 
+apiRouterV1.get '/', ((req, res, next) ->
+  res.json version.info()
+)
+
 app.use '/api/v1', apiRouterV1
 
 # lmao lmfao
@@ -57,7 +61,7 @@ main = (->
 
     line = line.split('_algo_').join(config.algo)
     line = line.split('_version_').join(config.package.version)
-    line = line.split('_versionName_').join(config.versionName)
+    line = line.split('_versionInt_').join(config.version)
 
     while line.length < (maxLen = 44)
       line += ' '
@@ -70,19 +74,17 @@ main = (->
   bulk = lines.join '\n'
 
   randomColor = _.sample [
-    colors.inverse.red
     colors.inverse.yellow
-    colors.dim
     colors.inverse.green
     colors.inverse.blue
   ]
 
-  log randomColor(bulk)
+  log randomColor(bulk) + '\n'
 
-  log 'initializing bolt node'
+  L 'initializing node'
 
   app.listen config.ports.http, ->
-    log "listening on port #{config.ports.http}"
+    L "listening on #{config.ports.http}"
 )
 
 main()

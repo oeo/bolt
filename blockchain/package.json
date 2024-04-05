@@ -1,6 +1,6 @@
 {
   "name": "blockchain",
-  "version": "0.1.1",
+  "version": "0.1.13",
   "main": "index.js",
   "dependencies": {
     "@ethereumjs/block": "^4.2.1",
@@ -30,10 +30,6 @@
     "morgan": "^1.10.0",
     "ora": "^6.3.0",
     "peer": "^1.0.0",
-    "pino": "^8.19.0",
-    "pino-http": "^9.0.0",
-    "pino-pretty": "^11.0.0",
-    "redis": "^4.6.5",
     "ripemd160": "^2.0.2",
     "sha3": "^2.1.4",
     "short-uuid": "^4.2.2",

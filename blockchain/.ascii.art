@@ -1,9 +1,8 @@
-     /    /                                     
      \  //
       \ \                 
      /   \       ϟ _version_
-   ↯/ ↯ /     name: _versionName_             
-    \  /↯     hash: _algo_                            
+   ↯/ ↯ /     vint: _versionInt_             
+    \  /↯     hash: _algo_                       
      \|↯      
       v
 
