@@ -13,9 +13,9 @@ config = {
   # @note: "bolthash" will soon be available once we format the output
   # to be comparable to sha so it can come up with similar outputs
   #
-  # @valid: sha256, scrypt
+  # @valid: sha256, scrypt, bolthash
   #
-  algo: 'scrypt'
+  algo: 'bolthash'
 
   minFee: 0.0001
   maxBlockSize: 1024 * 1024
