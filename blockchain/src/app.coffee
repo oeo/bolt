@@ -46,12 +46,12 @@ apiRouterV1.get '/', ((req, res, next) ->
 
 app.use '/api/v1', apiRouterV1
 
-# lmao lmfao
+# Handle errors
 app.use (err, req, res, next) ->
   console.error err.stack
   res.status(500).json({ error: 500 })
 
-# graceful shutdown handling
+# Graceful shutdown handling
 require('process').on 'exit', process.exit
 
 main = (->
