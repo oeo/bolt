@@ -1,11 +1,11 @@
 ### @todo
-- [x] 1 enforce bolthash to produce sha256 like hex only outputs with same len (64)
-  - [x] 1 rebuild node module and test
-  - [x] 1 rebuild cli tool and test
-  - [ ] 3 rebuild webasm library and test
+- [x] enforce bolthash to produce sha256 like hex only outputs with same len (64)
+  - [x] rebuild node module and test
+  - [x] rebuild cli tool and test
+  - [ ] rebuild webasm library and test
     - this needs fixed, producing wrong hashes
-- [ ] 1 `/blockchain` - make these libraries and primitives into a network node
-  - [ ] 1 implement p2p sync
-- [ ] 1 `/www/explorer/`: contains a react-based block explorer gui.
-- [ ] 2 `/wallets/browser-extension-wallet/`: contains the chrome and firefox wallet extension.
+- [ ] `/blockchain` - make these libraries and primitives into a network node
+  - [ 1 implement p2p sync
+- [ ] `/www/explorer/`: contains a react-based block explorer gui.
+- [ ] `/wallets/browser-extension-wallet/`: contains the chrome and firefox wallet extension.
 
