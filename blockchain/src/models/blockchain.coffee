@@ -122,7 +122,7 @@ BlockchainSchema.methods.nextBlock = (minerWallet) ->
       comment: null
       hash: null
       hash_previous: lastBlock.hash
-      difficulty: await calculateBlockDifficulty(@_id, lastHeight + 1) 
+      difficulty: await calculateBlockDifficulty(@_id, lastHeight + 1)
     }
 
   else
@@ -134,7 +134,7 @@ BlockchainSchema.methods.nextBlock = (minerWallet) ->
 BlockchainSchema.methods.query = (x...) ->
   await db.Blocks.find(x...)
 
-BlockchainSchema.methods.addressBalance = (address,includeMempool=false) ->
+BlockchainSchema.methods.addressBalance = (address, includeMempool = false) ->
   items = await Block.find({
     blockchain: @_id
     $or: [

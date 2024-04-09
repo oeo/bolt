@@ -65,3 +65,4 @@ module.exports.register = (commander) ->
     .action ->
       log config
       exit 0
+

@@ -73,3 +73,4 @@ class P2P
       console.log "Received invalid blockchain"
 
 module.exports = P2P
+

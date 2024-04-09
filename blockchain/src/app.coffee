@@ -1,10 +1,10 @@
 config = require './lib/globals'
 
 express = require 'express'
-cors = require 'cors'
-morgan = require 'morgan'
 bodyParser = require 'body-parser'
 compression = require 'compression'
+morgan = require 'morgan'
+cors = require 'cors'
 
 app = express()
 app.disable 'x-powered-by'
@@ -13,8 +13,8 @@ app.disable 'x-powered-by'
 app.use bodyParser.json()
 app.use bodyParser.urlencoded({ extended: true })
 app.use morgan('dev')
-app.use cors()
 app.use compression()
+app.use cors()
 
 app.use ((req, res, next) ->
   next()

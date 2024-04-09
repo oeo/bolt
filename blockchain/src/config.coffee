@@ -11,8 +11,7 @@ config = {
 
   staging: false
 
-  # valid: [sha256, scrypt, bolthash]
-  algo: 'bolthash'
+  algo: 'bolthash' # ex: [sha256, scrypt, bolthash]
 
   minFee: 0.0001
   maxBlockSize: 1024 * 1024
