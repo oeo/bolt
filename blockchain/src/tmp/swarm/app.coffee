@@ -28,6 +28,9 @@ class Network
     if !@id
       @id = crypto.randomBytes(32)
 
+    if !@port
+      @port = 8080
+
     config = swarmConfig({
       id: @id
     })
@@ -36,6 +39,9 @@ class Network
     @peers = []
 
   start: ->
+    @swarm.listen(@port)
+    console.log "Listening on port: #{port}"
+
     @swarm.join(@topic)
 
     @swarm.on 'connection', (conn, info) =>
