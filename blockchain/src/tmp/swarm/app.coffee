@@ -39,7 +39,7 @@ class Network
 
   start: ->
     @swarm.listen(@port)
-    console.log "Listening on port: #{port}"
+    console.log "Listening on port: #{@port}"
 
     @swarm.join(@topic)
 
