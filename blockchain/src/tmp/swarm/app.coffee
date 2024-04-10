@@ -1,6 +1,7 @@
 # vim: set expandtab tabstop=2 shiftwidth=2 softtabstop=2
 Swarm = require 'discovery-swarm'
 crypto = require 'crypto'
+getPort = require 'get-port'
 
 DEFAULT_OPTS = {
   dns: {
@@ -23,7 +24,7 @@ DEFAULT_OPTS = {
 swarmConfig = (opts) -> Object.assign({}, DEFAULT_OPTS, opts)
 
 class Network
-  constructor: (@topic, @id = null) ->
+  constructor: (@topic, @id = null, @port = null) ->
     if !@id
       @id = crypto.randomBytes(32)
 
