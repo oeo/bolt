@@ -15,13 +15,15 @@ TransactionSchema = new mongoose.Schema({
   }
 
   from: { type: String }
-  to: { type: String, required:true }
+  to: { type: String, required: true }
 
-  contractFn: { type:String, default:null }
+  ###
+  contractFn: { type: String, default: null }
   contractArgs: [{
     type: mongoose.Schema.Types.Mixed
     default: []
   }]
+  ###
 
   fee: {
     type: Number

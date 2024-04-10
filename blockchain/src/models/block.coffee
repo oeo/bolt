@@ -129,7 +129,7 @@ BlockSchema.methods.calculateHash = (returnString = false) ->
 
   hashBigInt = BigInt("0x#{hashStr}")
 
-  return {hashStr, hashBigInt}
+  return { hashStr, hashBigInt }
 
 BlockSchema.methods.calculateBlockDifficulty = (height = 0) ->
   return await calculateBlockDifficulty(@blockchain, height)
@@ -137,12 +137,12 @@ BlockSchema.methods.calculateBlockDifficulty = (height = 0) ->
 BlockSchema.methods.calculateBlockReward = (height = 0) ->
   return await calculateBlockReward(height)
 
-# validate the block
+# validate this block
 BlockSchema.methods.isValid = ->
 
-  # check hash 
+  # Check hash 
   target = getTargetForDifficulty(@difficulty)
-  {hashStr, hashBigInt} = await @calculateHash()
+  { hashStr, hashBigInt } = await @calculateHash()
 
   if hashStr isnt @hash
     return new Error '`hash` invalid'
@@ -154,33 +154,20 @@ BlockSchema.methods.isValid = ->
   if @difficulty isnt (await calculateBlockDifficulty(@blockchain, @_id))
     return new Error '`difficulty` invalid'
 
-  # check reward 
+  # Check reward 
   if @transactions.length
     rewardItem = _.find(@transactions,{ from: null, comment: 'block_reward' })
     if rewardItem.amount isnt (await calculateBlockReward(@_id))
       return new Error '`minerReward` invalid'
 
-  # check merkle
+  # Check merkle
   if @hash_merkle isnt merkle(@transactions)
     return new Error '`hash_merkle` is invalid'
 
-  # block valid 
+  # Block is valid 
   return true
 
-BlockSchema.methods.xmine = (->
-  _mine = () =>
-    target = getTargetForDifficulty(@difficulty)
-    { hashStr, hashBigInt } = await @calculateHash()
-
-    if hashBigInt < target
-      return @hashStr
-    else
-      @nonce = @nonce + 1
-      _mine()
-
-  return _mine()
-)
-
+# Local mining function
 BlockSchema.methods.mine = ->
   miningCanceled = false
 
@@ -200,7 +187,7 @@ BlockSchema.methods.mine = ->
 
     while not miningCanceled
       for i in [1..iterationsBeforeCheckingCancel] by 1
-        {hashStr, hashBigInt} = await @calculateHash()
+        { hashStr, hashBigInt } = await @calculateHash()
 
         if hashBigInt < target
           @hash = hashStr

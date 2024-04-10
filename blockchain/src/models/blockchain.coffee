@@ -1,7 +1,7 @@
 config = require './../config'
 
 Block = require './block'
-{Transaction,TransactionSchema} = require './transaction'
+{ Transaction, TransactionSchema } = require './transaction'
 
 {
   median,

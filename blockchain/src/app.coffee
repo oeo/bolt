@@ -1,5 +1,7 @@
 config = require './lib/globals'
 
+tor = require 'tor-request'
+
 express = require 'express'
 bodyParser = require 'body-parser'
 compression = require 'compression'
@@ -83,8 +85,9 @@ main = (->
 
   L 'initializing node'
 
-  app.listen config.ports.http, ->
-    L "listening on #{config.ports.http}"
+  app.listen config.ports.http, (e) ->
+    if e then throw e
+    L "http listening on #{config.ports.http}"
 )
 
 main()
