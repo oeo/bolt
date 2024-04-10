@@ -35,7 +35,6 @@ class Network
     @peers = []
 
   start: ->
-    @swarm.listen 7001
     @swarm.join(@topic)
 
     @swarm.on 'connection', (conn, info) =>
