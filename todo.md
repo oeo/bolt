@@ -5,8 +5,10 @@
   - [ ] fix webasm library
 - [ ] peer functionality
   - [ ] add tor functionality
-  - [ ] implement bootstrap node list
   - [ ] add peer discovery and sync
+    - [ ] utilize ipfs pubsub wrapper
+        - command: `list <cid>`
+        - command: `peer <ip>`
 - [ ] dockerize node setup and streamline deployment process
 - [ ] add block explorer (`/explorer/`)
 - [ ] add browser extension or electron wallet (`/wallet/`)
