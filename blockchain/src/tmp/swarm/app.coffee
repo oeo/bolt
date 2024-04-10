@@ -1,7 +1,6 @@
 # vim: set expandtab tabstop=2 shiftwidth=2 softtabstop=2
 Swarm = require 'discovery-swarm'
 crypto = require 'crypto'
-getPort = require 'get-port'
 
 DEFAULT_OPTS = {
   dns: {
