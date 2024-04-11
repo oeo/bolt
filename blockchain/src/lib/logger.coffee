@@ -8,7 +8,7 @@ signale.config(signaleConfig = {
   displayDate: false
   displayFilename: false
   displayLabel: false
-  displayTimestamp: false
+  displayTimestamp: true
   underlineLabel: false
   underlineMessage: false
   underlinePrefix: false

@@ -67,9 +67,9 @@ main = (->
 
     line = line.split('_algo_').join(config.algo)
     line = line.split('_version_').join(config.package.version)
-    line = line.split('_versionInt_').join(config.version)
+    line = line.split('_versionInt_').join(config.versionInt)
 
-    while line.length < (maxLen = 44)
+    while line.length < (maxLen = 42)
       line += ' '
 
     while line.length > maxLen
@@ -87,7 +87,7 @@ main = (->
 
   log randomColor(bulk) + '\n'
 
-  L 'node ' + identity.address
+  L 'node address ' + identity.address
 
   app.listen config.ports.http, (e) ->
     if e then throw e
