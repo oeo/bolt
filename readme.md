@@ -22,7 +22,7 @@ are rewarded in bolt for solving blocks, the native currency of the chain.
 ## peer discovery
 
 this project uses the [libp2p](https://libp2p.io/) library for peer-to-peer 
-communication and peer discovery in my blockchain implementation.
+communication and peer discovery.
 
 the main components involved in peer discovery are:
 
