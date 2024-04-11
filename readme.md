@@ -2,7 +2,7 @@
   <img src="assets/logo-red-bg.svg" height="200">
 </p>
 
-bolt is a censorship-resistant, distributed proof-of-work blockchain. miners
+**bolt** is a censorship-resistant, distributed proof-of-work blockchain. miners
 are rewarded in bolt for solving blocks, the native currency of the chain.
 
 - custom hashing function: designed to attempt to provide similar performance between cpu and gpu mining.
