@@ -34,7 +34,7 @@ and no fundraising or premine of any kind.
 
 ---
 
-### @todo
+#### @todo
 - [x] enforce bolthash to produce sha256 like hex only outputs with same len
   - [x] rebuild node module and test
   - [x] rebuild cli tool and test
@@ -49,7 +49,7 @@ and no fundraising or premine of any kind.
 - [ ] create standalone wallet (electron?/web?/browserext?)
 - [ ] dockerize everything
 
-### ambitions
+#### @ambitions
 - rust-based v8 smart contract executor
   - allows newcomers to write in a familiar syntax while maintaining strict execution and computation limits for miners
   - highly performant and circumvents nodejs' single-threaded nature
