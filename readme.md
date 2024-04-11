@@ -1,4 +1,8 @@
-bolt is a censorship-resistant, distributed proof-of-work blockchain. miners
+<p align="center">
+  <img src="assets/logo-red-bg.svg" height="150">
+</p>
+
+`bolt` is a censorship-resistant, distributed proof-of-work blockchain. miners
 are rewarded in bolt for solving blocks, the native currency of the chain.
 
 ### features

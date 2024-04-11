@@ -1,11 +1,5 @@
-# rust
 target/
 **/*.rs.bk
-
-# cargo.lock - uncomment for libraries, keep for binaries
-# cargo.lock
-
-# editor & ide
 .vscode/
 .idea/
 *.swp
@@ -13,29 +7,18 @@ target/
 *~
 .ds_store
 thumbs.db
-
-# project and env
 node_modules/
 .tmp
 .env
-
-# compiled python
 *.pyc
-
-# logs
 *.log
 *.sqlite
-
-# build outputs
 /dist/
 /build/
 /out/
-
-# archives
 *.zip
 *.tar
 *.gz
 *.bz2
 *.7z
 *.rar
-
