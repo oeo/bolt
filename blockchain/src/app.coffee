@@ -1,7 +1,5 @@
 config = require './lib/globals'
 
-tor = require 'tor-request'
-
 express = require 'express'
 bodyParser = require 'body-parser'
 compression = require 'compression'
@@ -18,7 +16,13 @@ app.use morgan('dev')
 app.use compression()
 app.use cors()
 
+# Create req.options
 app.use ((req, res, next) ->
+  req.options = {}
+  if _.size(req.body)
+    req.options = _.clone(req.body)
+  for k,v of req.query
+    req.options[k] ?= v
   next()
 )
 

@@ -8,6 +8,7 @@ target/
 .ds_store
 thumbs.db
 node_modules/
+tmp/
 .tmp
 .env
 *.pyc
