@@ -1,35 +1,47 @@
-<img src="assets/bolt-reverse.svg" height="150" align="right" />
-bolt is a censorship-resistant, distributed proof-of-work blockchain designed 
-to have bitcoin's best characteristics. The chain is built using using 
-nodejs and leverages a [custom hashing function](bolthash/rust) written
-in rust for balanced performance between cpu and gpu mining. miners 
+bolt is a censorship-resistant, distributed proof-of-work blockchain. miners
 are rewarded in bolt for solving blocks, the native currency of the chain.
-
-the source of the chain itself and more information regarding it can be
-found here in [blockchain/](blockchain).
 
 ### features
 
 - **custom hashing function**: designed to attempt to provide similar performance between cpu and gpu mining.
 - **native chain currency**: bolt has its native currency for rewarding miners.
-- **bitcoin in sprit**: the blockchain is designed to inherit bitcoin's best characteristics, including.
+- **proof of work**: the blockchain is designed to inherit bitcoin's best characteristics, including.
   - automatic difficulty adjustments and target block times.
   - fixed supply cap and decreasing issuance of block rewards.
+  - the chain can be configured to use bolt's custom hashing function, sha256 or scrypt.
 
-### structure
+### stack
 
-- `assets/`: contains static assets and brandables.
-- `blockchain/`: contains the blockchain component written in coffeescript.
-- `bolthash/rust/`: contains the custom hashing function that is written in rust.
-  - note: this is ported to other language libraries like webasm for browsers and node.js for non-web node applications. examples are provided for each.
+- nodejs
+  - blockchain node
+- rust
+  - custom hash export
+  - v8 contract execution service
+- storage
+  - mongodb
+  - redis
 
 ### fair distribution
-bolt intends to launch with a fair distribution and without a premine and
-without fundraising.
+when mainnet is launched anyone interested will be able to run a node and 
+begin mining blocks and will be eligible for the block subsidy reward.
 
-the configured block time and issuance schedule is designed to follow 
-roughly the schedule and behviour of bitcoin. at the very least the features of 
-digital scarcity and proof of work will remain constant. however, i'll reserve
-the right the play with modern features such as a smart contract language, 
-different hashing algos, and so on prior to launch.
+there will be no preallocated tokens of any kind, no airdrop of any kind,
+and no fundraising or premine of any kind.
+
+---
+
+### @todo
+- [x] enforce bolthash to produce sha256 like hex only outputs with same len (64)
+  - [x] rebuild node module and test
+  - [x] rebuild cli tool and test
+  - [ ] fix webasm library
+- [ ] peer functionality
+  - [ ] add tor functionality
+  - [ ] add peer discovery and sync
+    - [ ] utilize ipfs pubsub wrapper
+        - command: `list <cid>`
+        - command: `peer <ip>`
+- [ ] dockerize node setup and streamline deployment process
+- [ ] add block explorer (`/explorer/`)
+- [ ] add browser extension or electron wallet (`/wallet/`)
 
