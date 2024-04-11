@@ -66,4 +66,3 @@ if !module.parent
   L.error new Error 'error message'
   L.fatal new Error 'hello there'
 
-

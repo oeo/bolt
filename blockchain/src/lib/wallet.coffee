@@ -1,8 +1,16 @@
-config = require './../config'
-
 ec = require 'elliptic'
 bip39 = require 'bip39'
 hdkey = require 'hdkey'
+
+# m/84h/779h/0h/0h
+# https://github.com/satoshilabs/slips/blob/master/slip-0044.md
+DERIVATION_DEFAULT = {
+  purpose: 84
+  coinType: 779
+  account: 0
+  change: 0
+  index: 0
+}
 
 {
   createHash
@@ -16,12 +24,12 @@ class Wallet
   constructor: (opt = {
     seedPhrase: null
     privateKeyString: null
-    derivationPath: config.derivationPath
+    derivationPath: null
   }) ->
     defaults = {
       seedPhrase: opt.seed ? null
       privateKeyString: opt.privateKey ? null
-      derivationPath: opt.path ? config.derivationPath ? null
+      derivationPath: opt.path ? DERIVATION_DEFAULT
     }
 
     for k,v of defaults
@@ -29,12 +37,9 @@ class Wallet
 
     @opt = opt
 
-    @new = false
     @mnemonic = null
 
     if !opt.seedPhrase and !opt.privateKeyString
-      @new = true
-
       seedPhrase = bip39.generateMnemonic()
       seed = bip39.mnemonicToSeedSync(seedPhrase)
 
@@ -63,13 +68,14 @@ class Wallet
 
     @toJSON = (=>
       tmp = {}
+
       for k,v of @
         if typeof v is 'string' or k in [
-          'new'
           'hdwallet'
         ]
           tmp[k] = v
-      return tmp
+
+      return JSON.parse(JSON.stringify(tmp))
     )
 
     return @
@@ -142,7 +148,6 @@ class Wallet
 
     return transaction
 
-
   getBalance: (includeMempool = false) ->
     if !@_blockchain
       throw new Error 'Not connected to a chain, use `wallet.use(blockchain)`'
@@ -160,7 +165,7 @@ class Wallet
 
   # Check if address is valid
   isValidAddress: (address) ->
-    if address.startsWith('bold')
+    if address.startsWith('bolt')
       address = address.substr(0, 4)
     addressRegex = /[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{22,34}$/
     addressRegex.test(address)

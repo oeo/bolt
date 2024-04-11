@@ -50,7 +50,7 @@ apiRouterV1.get '/', ((req, res, next) ->
   res.json version.info()
 )
 
-app.use '/api/v1', apiRouterV1
+app.use '/v1', apiRouterV1
 
 # Handle errors
 app.use (err, req, res, next) ->
@@ -87,7 +87,7 @@ main = (->
 
   log randomColor(bulk) + '\n'
 
-  L 'initializing node'
+  L 'node ' + identity.address
 
   app.listen config.ports.http, (e) ->
     if e then throw e

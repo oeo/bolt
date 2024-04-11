@@ -29,16 +29,6 @@ config = {
   difficultyChangeBlockConsideration: 3
   confirmations: 6
 
-  # m/84h/779h/0h/0h
-  # https://github.com/satoshilabs/slips/blob/master/slip-0044.md
-  derivation: {
-    purpose: 84
-    coinType: 779
-    account: 0
-    change: 0
-    index: 0
-  }
-
   storage: {
     mongo: 'mongodb://127.0.0.1:27017/' + vers.info().prefixMongo
     redis: 'redis://127.0.0.1:6379/0'
