@@ -6,7 +6,6 @@ bolt is a censorship-resistant, distributed proof-of-work blockchain. miners
 are rewarded in bolt for solving blocks, the native currency of the chain.
 
 ## features
-
 - **custom hashing function**: designed to attempt to provide similar performance between cpu and gpu mining.
 - **native chain currency**: bolt has its native currency for rewarding miners.
 - **proof of work**: the blockchain is designed to inherit bitcoin's best characteristics.
@@ -15,15 +14,10 @@ are rewarded in bolt for solving blocks, the native currency of the chain.
   - the chain can be configured to use bolt's custom hashing function, sha256 or scrypt.
 
 ## stack
-
 - nodejs
-  - blockchain node
 - rust
-  - custom hash function
-  - v8 contract execution service
-- storage
-  - mongodb
-  - redis
+- mongodb
+- redis
 
 ## fair distribution
 when mainnet is launched anyone interested will be able to run a node and 
@@ -34,23 +28,46 @@ and no fundraising or premine of any kind.
 
 ---
 
-#### @todo
+### @todo
 - [x] enforce bolthash to produce sha256 like hex only outputs with same len
   - [x] rebuild node module and test
   - [x] rebuild cli tool and test
   - [ ] fix webasm export
 - [ ] p2p
-  - [ ] add tor capability
-  - [ ] add p2p discovery
-    - [ ] utilize ipfs pubsub
+  - [ ] add tor functionality
+  - [ ] p2p discovery
+    - [ ] utilize ipfs pubsub implementation
       - lift the libp2p logic and write as service or wrap ipfs itself
-- [ ] dockerize node setup and streamline deployment process
 - [ ] add concept block explorer (react)
 - [ ] create standalone wallet (electron?/web?/browserext?)
 - [ ] dockerize everything
 
-#### @ambitions
+### @eventual
 - rust-based v8 smart contract executor
   - allows newcomers to write in a familiar syntax while maintaining strict execution and computation limits for miners
   - highly performant and circumvents nodejs' single-threaded nature
+
+---
+
+### license
+
+mit license
+
+permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "software"), to deal
+in the software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the software, and to permit persons to whom the software is
+furnished to do so, subject to the following conditions:
+
+the above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the software.
+
+the software is provided "as is", without warranty of any kind, express or
+implied, including but not limited to the warranties of merchantability,
+fitness for a particular purpose and noninfringement. in no event shall the
+authors or copyright holders be liable for any claim, damages or other
+liability, whether in an action of contract, tort or otherwise, arising from,
+out of or in connection with the software or the use or other dealings in the
+software.
 
