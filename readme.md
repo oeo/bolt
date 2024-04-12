@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo-red-bg.svg" height="200">
+  <img src="assets/logo-red-bg.svg" height="275">
 </p>
 
 **bolt** is a censorship-resistant, distributed proof-of-work blockchain. miners
@@ -12,7 +12,7 @@ are rewarded in bolt for solving blocks, the native currency of the chain.
   - fixed supply cap and decreasing issuance of block rewards.
   - the chain can be configured to use bolt's custom hashing function, sha256 or scrypt.
 
-### tree
+### structure
 ```
 ├── assets
 ├── blockchain
