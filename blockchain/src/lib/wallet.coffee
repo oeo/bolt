@@ -1,3 +1,4 @@
+config = require './../config'
 ec = require 'elliptic'
 bip39 = require 'bip39'
 hdkey = require 'hdkey'

@@ -1,4 +1,3 @@
-#!/usr/bin/env coffee
 require './../lib/globals'
 config = require './../config'
 

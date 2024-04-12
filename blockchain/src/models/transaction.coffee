@@ -70,7 +70,6 @@ TransactionSchema.methods.calculateHash = ->
 
   createHash(str, { type: config.algo })
 
-# validation
 TransactionSchema.methods.isValid = ->
   try
     await @tryValidate()

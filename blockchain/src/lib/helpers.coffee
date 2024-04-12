@@ -154,7 +154,8 @@ lib._confirm = (question, defaultResponse='Y', cb) ->
     responseMarkup
   ].join(' ')
 
-  L questionStr + ': '
+  L questionStr
+
   rl.question '', (answer) ->
     validYes = ['y','yes']
 

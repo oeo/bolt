@@ -21,11 +21,6 @@ BlockchainSchema = new mongoose.Schema({
     default: config.versionInt
   }
 
-  default: {
-    type: Boolean
-    default: false
-  }
-
   miningReward: {
     type: Number
     default: config.rewardDefault
@@ -70,25 +65,13 @@ BlockchainSchema.methods.sync = ->
   return @ if !genesisExists
   return @
 
+# @todo: add transaction to mempool
 BlockchainSchema.methods.addTransaction = (opt = {}) ->
   log /addTransaction/, opt
   txnObj = new Transaction(opt)
   log /txnObj/, txnObj
 
   return txnObj.toJSON()
-
-BlockchainSchema.methods.getLastBlock = (height = false) ->
-  b = await Block
-    .findOne({ blockchain: @_id })
-    .sort({ _id: -1 })
-    .limit(1)
-
-  if !b
-    if height then return 0
-    return null
-
-  if height then return b._id
-  return b
 
 # render the next block to be mined
 BlockchainSchema.methods.nextBlock = (minerWallet) ->
@@ -137,9 +120,24 @@ BlockchainSchema.methods.nextBlock = (minerWallet) ->
 
   return newBlock
 
+# get the latest block or one at a specific height
+BlockchainSchema.methods.getLastBlock = (height = false) ->
+  b = await Block
+    .findOne({ blockchain: @_id })
+    .sort({ _id: -1 })
+    .limit(1)
+
+  if !b
+    if height then return 0
+    return null
+
+  if height then return b._id
+  return b
+
 BlockchainSchema.methods.query = (x...) ->
   await db.Blocks.find(x...)
 
+# @todo: optimize with redis index, incorporate mempool
 BlockchainSchema.methods.addressBalance = (address, includeMempool = false) ->
   items = await Block.find({
     blockchain: @_id

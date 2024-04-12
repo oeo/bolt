@@ -1,4 +1,3 @@
-#!/usr/bin/env coffee
 config = require __dirname + '/../config'
 _ = require 'lodash'
 
