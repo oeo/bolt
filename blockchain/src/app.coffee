@@ -58,7 +58,7 @@ app.use (err, req, res, next) ->
   res.status(500).json({ error: 500 })
 
 # Graceful shutdown handling
-require('process').on 'exit', process.exit
+# require('process').on 'exit', process.exit
 
 main = (->
   bulk =  require('fs').readFileSync(__dirname + '/../.ascii.art','utf8')
