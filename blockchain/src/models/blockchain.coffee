@@ -1,7 +1,10 @@
+# vim: set expandtab tabstop=2 shiftwidth=2 softtabstop=2
 config = require './../config'
 
 Block = require './block'
-{ Transaction, TransactionSchema } = require './transaction'
+{ Transaction } = require './transaction'
+
+Mempool = require './../lib/mempool'
 
 {
   median,
@@ -15,7 +18,7 @@ BlockchainSchema = new mongoose.Schema({
   _id: {
     type: String
     required: true
-    default: config.version
+    default: config.versionInt
   }
 
   default: {
@@ -37,10 +40,6 @@ BlockchainSchema = new mongoose.Schema({
     type: Number
     default: config.minFee
   }
-
-  mempool: [
-    TransactionSchema
-  ]
 
   height: { type: Number, default: 0 }
 
@@ -71,7 +70,14 @@ BlockchainSchema.methods.sync = ->
   return @ if !genesisExists
   return @
 
-BlockchainSchema.methods.getLastBlock = (height=false) ->
+BlockchainSchema.methods.addTransaction = (opt = {}) ->
+  log /addTransaction/, opt
+  txnObj = new Transaction(opt)
+  log /txnObj/, txnObj
+
+  return txnObj.toJSON()
+
+BlockchainSchema.methods.getLastBlock = (height = false) ->
   b = await Block
     .findOne({ blockchain: @_id })
     .sort({ _id: -1 })
@@ -145,6 +151,7 @@ BlockchainSchema.methods.addressBalance = (address, includeMempool = false) ->
 
   balance = 0
 
+  # @todo: incorporate fees
   for x in items
     for t in x.transactions
       if t.to is address
@@ -152,23 +159,7 @@ BlockchainSchema.methods.addressBalance = (address, includeMempool = false) ->
       if t.from is address
         balance -= (t.amount - t.fee)
 
-  if !includeMempool then return balance
-
-  result = {}
-  result.onChain = balance
-  result.mempoolCredit = 0
-  result.mempoolDebt = 0
-  
-  for t in @mempool
-    if t.to is address
-      result.mempoolCredit += t.amount
-    if t.from is address
-      result.mempoolDebt -= (t.amount - t.fee)
-
-  result.balanceCalculated =
-    (result.onChain + result.mempoolCredit - result.mempoolDebt)
-
-  return result
+  return balance
 
 Blockchain = mongoose.model 'Blockchain', BlockchainSchema
 module.exports = Blockchain

@@ -1,3 +1,4 @@
+# vim: set expandtab tabstop=2 shiftwidth=2 softtabstop=2
 config = require './../config'
 
 Blockchain = require './blockchain'
@@ -17,7 +18,7 @@ ContractSchema = new mongoose.Schema({
   blockchain: {
     type: String
     ref: 'Blockchain'
-    default: config.version
+    default: config.versionInt
   }
 
   address: {
@@ -50,7 +51,7 @@ ContractSchema = new mongoose.Schema({
     default: -> time()
   }
 
-},{ versionKey:false, strict:true })
+},{ versionKey: false, strict: true })
 
 ContractSchema.pre 'save', (next) ->
   next()

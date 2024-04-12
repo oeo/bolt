@@ -1,3 +1,4 @@
+# vim: set expandtab tabstop=2 shiftwidth=2 softtabstop=2
 config = require './../config'
 
 mongoose = require 'mongoose'
@@ -8,20 +9,23 @@ merkle = require './../lib/merkle'
 helpers = require './../lib/helpers'
 
 {
-  time,
-  createHash,
-  calculateBlockReward,
-  calculateBlockDifficulty,
+  time
+  createHash
+  calculateBlockReward
+  calculateBlockDifficulty
 } = require './../lib/helpers'
 
 BlockSchema = new mongoose.Schema({
 
-  _id: Number
+  _id: {
+    type: Number
+    required: true
+  }
 
   blockchain: {
     type: String
     ref: 'Blockchain'
-    default: config.version
+    default: config.versionInt
   }
 
   transactions: {
@@ -79,24 +83,22 @@ maxTarget = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
 getTargetForDifficulty = (difficulty) -> maxTarget / BigInt(difficulty)
 
 # determine my own block id
-BlockSchema.pre 'save', (next) ->
-  if !@isValid()
-    return next new Error 'Block is not valid'
+BlockSchema.pre 'save', ((next) ->
+  try
+    await @tryValidate()
+  catch e
+    return next e
+
+  _time = time()
 
   lastBlock = await Block
     .findOne({ blockchain: @blockchain })
     .sort({ _id: -1 })
-    .limit(1)
 
-  if lastBlock
-    if @_id isnt (lastBlock._id + 1)
-      return next new Error 'Block height is invalid'
+  @time_elapsed = @ctime - lastBlock?.ctime ? 0
 
-    @time_elapsed = @ctime - lastBlock.ctime
-  else
-    @time_elapsed = 0
-
-  next()
+  return next()
+)
 
 BlockSchema.post 'save', (doc) ->
   eve.emit 'block_solved', {
@@ -114,14 +116,14 @@ BlockSchema.post 'save', (doc) ->
 
 # calculate block hash 
 BlockSchema.methods.calculateHash = (returnString = false) ->
-  str = [
+  str = _.compact([
+    "#{@_id}"
     "#{@blockchain}"
     "#{@hash_previous}"
     "#{@hash_merkle}"
-    "#{@ctime}"
     "#{@difficulty}"
     "#{@nonce}"
-  ].join('')
+  ]).join('')
 
   hashStr = createHash(str, {
     type: config.algo
@@ -137,32 +139,62 @@ BlockSchema.methods.calculateBlockDifficulty = (height = 0) ->
 BlockSchema.methods.calculateBlockReward = (height = 0) ->
   return await calculateBlockReward(height)
 
-# validate this block
+# validation
 BlockSchema.methods.isValid = ->
+  try
+    await @tryValidate()
+    return true
+  catch e
+    return false
+
+BlockSchema.methods.tryValidate = ->
+
+  # Get last block
+  lastBlock = await Block
+    .findOne({ blockchain: @blockchain })
+    .sort({ _id: -1 })
+
+  if lastBlock
+
+    # Check last block hash
+    if @hash_previous isnt lastBlock.hash
+      throw new Error '`hash_previous` invalid'
+
+    # Check block height
+    if @_id isnt lastBlock._id + 1
+      throw new Error '`_id` (block height) invalid'
 
   # Check hash 
   target = getTargetForDifficulty(@difficulty)
   { hashStr, hashBigInt } = await @calculateHash()
 
   if hashStr isnt @hash
-    return new Error '`hash` invalid'
+    throw new Error '`hash` invalid'
 
   hashValid = hashBigInt < target
-  return new Error('`hashBigInt` invalid (too small)') if !hashValid
+
+  if !hashValid
+    throw new Error('`hashBigInt` invalid (too small)')
 
   # Check difficulty 
   if @difficulty isnt (await calculateBlockDifficulty(@blockchain, @_id))
-    return new Error '`difficulty` invalid'
+    throw new Error '`difficulty` invalid'
 
-  # Check reward 
+  # Check reward transactions
   if @transactions.length
-    rewardItem = _.find(@transactions,{ from: null, comment: 'block_reward' })
+    rewardItems = _.filter(@transactions, { from: null, comment: 'block_reward' })
+
+    if rewardItems.length isnt 1
+      throw new Error 'Invalid number of block reward transactions'
+
+    rewardItem = rewardItems[0]
+
     if rewardItem.amount isnt (await calculateBlockReward(@_id))
-      return new Error '`minerReward` invalid'
+      throw new Error '`minerReward` invalid'
 
   # Check merkle
   if @hash_merkle isnt merkle(@transactions)
-    return new Error '`hash_merkle` is invalid'
+    throw new Error '`hash_merkle` is invalid'
 
   # Block is valid 
   return true

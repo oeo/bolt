@@ -1,8 +1,8 @@
 config = require './globals'
 
 util = require 'util'
+uuid = require 'uuid'
 crypto = require 'crypto'
-
 base_x = require 'base-x'
 
 BASE_ALPHABETS = {
@@ -10,10 +10,21 @@ BASE_ALPHABETS = {
   BASE_58: '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 }
 
+# m/84h/779h/0h/0h
+# https://github.com/satoshilabs/slips/blob/master/slip-0044.md
+DERIVATION_DEFAULT = {
+  purpose: 84
+  coinType: 779
+  account: 0
+  change: 0
+  index: 0
+}
+
 { scrypt } = require('@noble/hashes/scrypt')
 bolthash = require __dirname + '/../../../bolthash/nodejs'
 
 helpers = lib = {
+  DERIVATION_DEFAULT
   BASE_ALPHABETS
   BASE_CLIENTS: {}
 }
@@ -34,9 +45,6 @@ lib.base_operation = (operation = 'encode', model = 58, data) -> (
 
   client[operation](data)
 )
-
-lib.sleep = (ms) -> new Promise (resolve, reject) ->
-  setTimeout resolve, ms
 
 lib.base_encode = (model, data) ->
   if !data and model
@@ -66,6 +74,11 @@ lib.getVersionByte = ->
     throw new Error('Major and minor versions must be between 0 and 15')
   return (major << 4) + minor
 
+lib.sleep = (ms) -> new Promise (resolve, reject) ->
+  setTimeout resolve, ms
+
+lib.uuid = uuid.v4
+
 lib.time = -> _.floor(new Date().getTime() / 1000)
 
 lib.timeBucket = (seconds) ->
@@ -79,13 +92,7 @@ lib.buildDerivationPath = (opt = {
   change: 0
   index: 0
 }) ->
-  defaults = {
-    purpose: config.derivation.purpose
-    coinType: config.derivation.coinType
-    account: config.derivation.account
-    change: config.derivation.change
-    index: config.derivation.index
-  }
+  defaults = DERIVATION_DEFAULT
 
   for k,v of defaults
     opt[k] ?= v
@@ -117,7 +124,7 @@ lib.createHash = (val, opt = {}) ->
 
   if opt.type is 'scrypt'
     hashUintArr = scrypt(val, '', { N: 1024, r: 8, p: 1, dkLen: 32 })
-    return lib.createHash(Buffer.from(hashUintArr).toString('hex'), 'sha')
+    return lib.createHash(Buffer.from(hashUintArr).toString('hex'), { type: 'sha' })
 
   if opt.type is 'bolthash'
     return bolthash val

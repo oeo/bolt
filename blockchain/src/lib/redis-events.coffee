@@ -1,3 +1,4 @@
+# vim: set expandtab tabstop=2 shiftwidth=2 softtabstop=2
 Redis = require 'ioredis'
 { EventEmitter } = require 'events'
 

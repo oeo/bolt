@@ -18,7 +18,7 @@ module.exports.register = (commander) ->
     .command('info')
     .description('get info about the blockchain')
     .action () ->
-      result = await Blockchain.findOne _id:config.version
+      result = await Blockchain.findOne { _id: config.version }
       log result
       exit 0
 

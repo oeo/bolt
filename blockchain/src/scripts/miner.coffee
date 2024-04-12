@@ -3,8 +3,10 @@ config = require './../lib/globals'
 { time } = require './../lib/helpers'
 
 Wallet = require './../lib/wallet'
+
 Block = require './../models/block'
 Blockchain = require './../models/blockchain'
+{ Transaction } = require './../models/transaction'
 
 # connect to chain
 L 'syncing chain data'
@@ -19,14 +21,17 @@ walletJSON = require('fs').readFileSync('./../data/test-wallets.json')
 walletJSON = JSON.parse(walletJSON)
 
 for item in walletJSON
-  wallets[item.name] = new Wallet({ seed: item.mnemonic })
+  # wallets[item.name] = new Wallet({ seed: item.mnemonic })
+  wallets[item.name] = new Wallet({ privateKey: item.privateKey })
   wallets[item.name].use(blockchain)
 
+L wallets
 L "loaded #{_.size(wallets)} wallets to use for this mining session"
 
 # mine blocks
 while 1
   wallet = _.first(_.shuffle(_.values(wallets)))
+
   nextBlock = await blockchain.nextBlock(wallet)
 
   start = time()
@@ -47,19 +52,27 @@ while 1
     nextBlock.hash = solvedHash
 
     try
-      if isValid = await nextBlock.isValid()
-        if success = await nextBlock.save()
+      await nextBlock.tryValidate()
+    catch e
+      log e
+      continue
 
-          L.success """
-            solved block ##{nextBlock._id} (nonce=#{success.nonce} elapsed=#{time() - start}s)
-          """
+    try
+      success = await nextBlock.save()
+    catch e
+      log e
+      continue
 
-          blockReward = _.find(success.transactions, {
-            comment: 'block_reward',
-          })
+    L.success """
+      solved block ##{nextBlock._id} (nonce=#{success.nonce} elapsed=#{time() - start}s)
+    """
 
-          if blockReward
-            L.success """
-               reward for ##{nextBlock._id} sent to #{blockReward.to} (#{blockReward.amount} bolt)
-            """
+    blockReward = _.find(success.transactions, {
+      comment: 'block_reward',
+    })
+
+    if blockReward
+      L.success """
+          reward for ##{nextBlock._id} sent to #{blockReward.to} (#{blockReward.amount} bolt)
+      """
 

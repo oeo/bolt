@@ -2,17 +2,8 @@ ec = require 'elliptic'
 bip39 = require 'bip39'
 hdkey = require 'hdkey'
 
-# m/84h/779h/0h/0h
-# https://github.com/satoshilabs/slips/blob/master/slip-0044.md
-DERIVATION_DEFAULT = {
-  purpose: 84
-  coinType: 779
-  account: 0
-  change: 0
-  index: 0
-}
-
 {
+  DERIVATION_DEFAULT
   createHash
   buildDerivationPath
   base_encode
@@ -21,154 +12,154 @@ DERIVATION_DEFAULT = {
 
 class Wallet
 
-  constructor: (opt = {
-    seedPhrase: null
-    privateKeyString: null
-    derivationPath: null
-  }) ->
+  constructor: (opt = {}) ->
     defaults = {
-      seedPhrase: opt.seed ? null
-      privateKeyString: opt.privateKey ? null
-      derivationPath: opt.path ? DERIVATION_DEFAULT
+      seedPhrase: null
+      privateKeyString: null
+      derivationPath: DERIVATION_DEFAULT
     }
 
-    for k,v of defaults
-      opt[k] ?= v
+    options = Object.assign({}, defaults, opt)
 
-    @opt = opt
-
+    @seedPhrase = options.seedPhrase ? opt.seed
+    @privateKeyString = options.privateKeyString ? opt.privateKey
+    @derivationPath = options.derivationPath ? opt.path
     @mnemonic = null
 
-    if !opt.seedPhrase and !opt.privateKeyString
-      seedPhrase = bip39.generateMnemonic()
-      seed = bip39.mnemonicToSeedSync(seedPhrase)
-
-      @hdwallet = hdkey.fromMasterSeed(seed)
-      @mnemonic = seedPhrase
-
-      masterKey = @hdwallet.derive('m')
-      @keyPair = new ec.ec('secp256k1').keyFromPrivate(masterKey.privateKey.toString('hex'))
-
-    if opt.privateKeyString and !opt.seedPhrase
-      @keyPair = new ec.ec('secp256k1').keyFromPrivate(opt.privateKeyString)
-
-    if opt.seedPhrase and !opt.privateKeyString
-      seed = bip39.mnemonicToSeedSync(@opt.seedPhrase)
-
-      @hdwallet = hdkey.fromMasterSeed(seed)
-      @mnemonic = @opt.seedPhrase
-
-      masterKey = @hdwallet.derive('m')
-      @keyPair = new ec.ec('secp256k1').keyFromPrivate(masterKey.privateKey.toString('hex'))
-
-    keyInfo = @getKeyInfo(@keyPair)
-
-    for k,v of keyInfo
-      this[k] = v
-
-    @toJSON = (=>
-      tmp = {}
-
-      for k,v of @
-        if typeof v is 'string' or k in [
-          'hdwallet'
-        ]
-          tmp[k] = v
-
-      return JSON.parse(JSON.stringify(tmp))
-    )
-
-    return @
+    if @seedPhrase
+      @initFromSeedPhrase()
+    else if @privateKeyString
+      @initFromPrivateKey()
+    else
+      @initNew()
 
   use: (blockchain) -> @_blockchain = blockchain
 
-  getKeyInfo: (keyPair = null) ->
-    if !keyPair then keyPair = @keyPair
-    if !@keyPair then throw new Error 'No keyPair provided'
+  initNew: ->
+    seedPhrase = bip39.generateMnemonic()
+    seed = bip39.mnemonicToSeedSync(seedPhrase)
 
-    tmp = {
-      privateKey: keyPair.getPrivate 'hex'
-      publicKey: keyPair.getPublic false, 'hex'
+    @hdwallet = hdkey.fromMasterSeed(seed)
+    @mnemonic = seedPhrase
+
+    derivationPath = "m/#{@derivationPath.purpose}'/#{@derivationPath.coinType}'/#{@derivationPath.account}'/#{@derivationPath.change}/#{@derivationPath.index}"
+    masterKey = @hdwallet.derive(derivationPath)
+
+    @keyPair = new ec.ec('secp256k1').keyFromPrivate(masterKey.privateKey.toString('hex'))
+    @updateKeyInfo()
+
+  initFromSeedPhrase: ->
+    seed = bip39.mnemonicToSeedSync(@seedPhrase)
+
+    @hdwallet = hdkey.fromMasterSeed(seed)
+    @mnemonic = @seedPhrase
+
+    derivationPath = "m/#{@derivationPath.purpose}'/#{@derivationPath.coinType}'/#{@derivationPath.account}'/#{@derivationPath.change}/#{@derivationPath.index}"
+    masterKey = @hdwallet.derive(derivationPath)
+
+    @keyPair = new ec.ec('secp256k1').keyFromPrivate(masterKey.privateKey.toString('hex'))
+    @updateKeyInfo()
+
+  initFromPrivateKey: ->
+    @keyPair = new ec.ec('secp256k1').keyFromPrivate(@privateKeyString)
+    @updateKeyInfo()
+
+  updateKeyInfo: ->
+    keyInfo = @getKeyInfo()
+
+    for k, v of keyInfo
+      this[k] = v
+
+  getKeyInfo: (keyPair = @keyPair) ->
+    if !keyPair
+      throw new Error 'No keyPair provided'
+
+    return {
+      privateKey: keyPair.getPrivate('hex')
+      publicKey: keyPair.getPublic(false, 'hex')
+
+      addressHash: createHash(keyPair.getPublic(false, 'hex'))
+      addressLong: createHash(keyPair.getPublic(false, 'hex')).substr(0, 34)
+      addressShort: addressShort = base_encode(58, createHash(keyPair.getPublic(false, 'hex')).substr(0, 34))
+      address: 'bolt' + addressShort
     }
 
-    tmp.address = createHash tmp.publicKey
-    tmp.address = tmp.address.substr 0, 34
-
-    tmp.addressShort = 'bolt' + base_encode(58, tmp.address)
-    tmp.address = 'bolt' + tmp.address
-
-    tmp.addresses = [
-      tmp.address
-      tmp.addressShort
-    ]
-
-    return tmp
-
-  createAddresses: (opt = {
-    account: 0
-    change: 0
-    count: 0
-    indexStart: 0
-  }) ->
+  createAddresses: (opt = {}) ->
     defaults = {
-      account: opt.account ? 0
-      change: opt.change ? 0
-      count: opt.count ? 10
-      indexStart: opt.indexStart ? 0
+      account: 0
+      change: 0
+      count: 10
+      indexStart: 0
     }
 
-    for k,v of defaults
-      opt[k] ?= v
+    options = Object.assign({}, defaults, opt)
 
     addresses = []
 
-    for index in [opt.indexStart...opt.indexStart + opt.count]
-      path = buildDerivationPath {
-        account: opt.account,
-        change: opt.change,
+    for index in [options.indexStart...(options.indexStart + options.count)]
+      path = buildDerivationPath
+        account: options.account
+        change: options.change
         index: index
-      }
+
       derivedKey = @hdwallet.derive(path)
       keyPair = new ec.ec('secp256k1').keyFromPrivate(derivedKey.privateKey.toString('hex'))
-      keyInfo = @getKeyInfo keyPair
-      addr = keyInfo
-      addr.path = path
-      addresses.push addr
+      keyInfo = @getKeyInfo(keyPair)
+      keyInfo.path = path
 
-    return addresses
+      addresses.push(keyInfo)
 
+    addresses
+
+  # sign and add transaction hash
   signTransaction: (transaction) ->
-    if transaction.fromAddress !in @addresses
+    if !@isAddressMine(transaction.from)
       throw new Error 'Cannot sign transactions for other wallets'
 
-    hash = transaction.calculateHash()
+    transaction.publicKey = @publicKey
 
-    signature = @keyPair.sign(hash, 'hex')
-    transaction.sign(signature)
+    hash = transaction.hash
+    signatureObj = @keyPair.sign(hash)
 
-    return transaction
+    # Convert the signature to a hexadecimal string
+    signature = signatureObj.toDER('hex')
+
+    # Assign the signature to the transaction
+    transaction.signature = signature
+
+    transaction
+
+  isValidAddress: (address) ->
+    address = address.substr(4) if address.startsWith('bolt')
+    /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{22,34}$/.test(address)
+
+  isAddressMine: (address) ->
+    @getKeyInfo().address is address
 
   getBalance: (includeMempool = false) ->
     if !@_blockchain
       throw new Error 'Not connected to a chain, use `wallet.use(blockchain)`'
 
-    balance = await @_blockchain.getBalance(@address)
+    result = await @_blockchain.addressBalance(@address, { includeMempool })
+    return result
 
-    if !includeMempool
-      return balance
-    else
-      return {
-        onChain: balance
-        mempoolCredit: await @_blockchain.getMempoolCredit(@address)
-        mempoolDebt: await @_blockchain.getMempoolDebt(@address)
-      }
+  toJSON: ->
+    tmp = {}
 
-  # Check if address is valid
-  isValidAddress: (address) ->
-    if address.startsWith('bolt')
-      address = address.substr(0, 4)
-    addressRegex = /[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{22,34}$/
-    addressRegex.test(address)
+    for k,v of @
+      if typeof v is 'string' or k in [
+        'hdwallet'
+      ]
+        tmp[k] = v
+
+    return JSON.parse(JSON.stringify(tmp))
+
+Wallet.addressFromPublicKey = (publicKey) -> {
+  addressHash: createHash(publicKey)
+  addressLong: createHash(publicKey).substr(0, 34)
+  addressShort: addressShort = base_encode(58, createHash(publicKey).substr(0, 34))
+  address: 'bolt' + addressShort
+}
 
 module.exports = Wallet
 

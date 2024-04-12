@@ -11,9 +11,9 @@ config = {
 
   staging: false
 
-  algo: 'bolthash' # ex: [sha256, scrypt, bolthash]
+  algo: 'scrypt' # ex: [sha256, scrypt, bolthash]
 
-  minFee: 0.0001
+  minFee: 0.001
   maxBlockSize: 1024 * 1024
   maxContractStateSize: 1024 * 1024
   maxTransactionsPerBlock: 4000
@@ -44,8 +44,8 @@ config = {
 
 configStaging = {
   staging: true
-  blockInterval: 10
-  rewardHalvingInterval: 50
+  blockInterval: 10 # 10 seconds
+  rewardHalvingInterval: 50 # 50 blocks
 }
 
 if vers.info().staging or env.STAGING

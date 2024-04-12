@@ -1,7 +1,7 @@
+# vim: set expandtab tabstop=2 shiftwidth=2 softtabstop=2
 config = require './globals'
 
 crypto = require 'crypto'
-
 { createHash } = require './helpers'
 
 module.exports = merkle_hash = (array) ->
@@ -56,4 +56,16 @@ if !module.parent
   ]
 
   console.log(merkle_hash(arr))
+
+  arr2 = [
+    { to: 'fred', from: 'john', amount: 50 }
+    { to: 'bob', from: 'fred', amount: 20 }
+  ]
+
+  console.log(merkle_hash(arr2))
+
+  # 2a2ceec2b1282aec6311e92f3c4c84695d5300425c6007ced370154375494b63
+  # 2a2ceec2b1282aec6311e92f3c4c84695d5300425c6007ced370154375494b63
+
+  exit 0
 

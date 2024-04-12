@@ -87,7 +87,7 @@ main = (->
 
   log randomColor(bulk) + '\n'
 
-  L 'node address ' + identity.address
+  L "node address #{identity.address}"
 
   app.listen config.ports.http, (e) ->
     if e then throw e
