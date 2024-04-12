@@ -32,7 +32,6 @@ transactionsRoutes = require './routes/transactions'
 walletsRoutes = require './routes/wallets'
 miningRoutes = require './routes/mining'
 networkRoutes = require './routes/network'
-contractsRoutes = require './routes/contracts'
 statsRoutes = require './routes/stats'
 
 # Setup versioned API
@@ -43,7 +42,6 @@ apiRouterV1.use '/transactions', transactionsRoutes
 apiRouterV1.use '/wallets', walletsRoutes
 apiRouterV1.use '/mining', miningRoutes
 apiRouterV1.use '/network', networkRoutes
-apiRouterV1.use '/contracts', contractsRoutes
 apiRouterV1.use '/stats', statsRoutes
 
 apiRouterV1.get '/', ((req, res, next) ->
