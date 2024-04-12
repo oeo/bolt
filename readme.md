@@ -12,6 +12,33 @@ are rewarded in bolt for solving blocks, the native currency of the chain.
   - fixed supply cap and decreasing issuance of block rewards.
   - the chain can be configured to use bolt's custom hashing function, sha256 or scrypt.
 
+### tree
+```
+├── assets
+├── blockchain
+│   └── src
+│       ├── data
+│       ├── lib
+│       │   └── peernode
+│       ├── models
+│       ├── routes
+│       └── scripts
+├── bolthash
+│   ├── cli
+│   │   └── src
+│   ├── nodejs
+│   │   ├── lib
+│   │   ├── native
+│   │   │   └── src
+│   │   └── test
+│   ├── rust
+│   │   └── src
+│   └── wasm
+│       ├── pkg
+│       └── src
+└── scripts
+```
+
 ### peer discovery
 
 this project uses the [libp2p](https://libp2p.io/) library for peer-to-peer 
@@ -32,7 +59,6 @@ when a new node is started, it performs the following steps for peer discovery:
 1. subscribes to specified topics using gossipsub and starts receiving messages published by other nodes on those topics.
 1. gossips about known peers and their subscribed topics to help other nodes discover and connect to them.
 
-
 ### fair distribution
 when mainnet is launched anyone interested will be able to run a node and 
 begin mining blocks and will be eligible for the block subsidy reward.
@@ -45,16 +71,22 @@ and no fundraising or premine of any kind.
   - [x] rebuild node module and test
   - [x] rebuild cli tool and test
   - [ ] fix webasm export
-- [ ] give node a keypair identifier unless already provided
+- [x] give node an automatic wallet/keypair in `$HOME/.bolt/identity.json`
+- [ ] implement mempool (redis)
+- [ ] implement trailing balance indexing (redis)
+  - this should sit N blocks behind the current block height and contain a redis snapshot of wallet balances
+- [x] finalize transaction signing and validation
+- [x] finalize block validation
 - [ ] p2p
   - [ ] standardize message format
   - [ ] add a p2p chat for node runners (fun!)
   - [ ] p2p discovery
     - [x] utilize ipfs pubsub implementation
-      [x] - lift the libp2p logic and write as service or wrap ipfs itself
-- [ ] add concept block explorer (react)
+    - [x] lift the libp2p logic and write as service or wrap ipfs itself
+- [ ] create minimal block and mempool explorer
+- [ ] create standalone miner in rust using block templating
 - [ ] create standalone wallet (electron?/web?/browserext?)
-- [ ] dockerize everything
+- [ ] dockerize node setup
 
 ### @eventual
 - rust-based v8 smart contract executor
