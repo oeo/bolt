@@ -1,3 +1,6 @@
+{ log } = console
+{ env, exit } = process
+
 config = require __dirname + '/../config'
 _ = require 'lodash'
 

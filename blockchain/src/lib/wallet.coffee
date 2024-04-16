@@ -1,7 +1,14 @@
+{ env, exit } = process
+{ log } = console
+
 config = require './../config'
+
+_ = require 'lodash'
 ec = require 'elliptic'
 bip39 = require 'bip39'
 hdkey = require 'hdkey'
+
+helpers = require './helpers'
 
 {
   DERIVATION_DEFAULT
@@ -9,7 +16,7 @@ hdkey = require 'hdkey'
   buildDerivationPath
   base_encode
   base_decode
-} = require './helpers'
+} = helpers
 
 class Wallet
 
@@ -82,7 +89,7 @@ class Wallet
       addressHash: createHash(keyPair.getPublic(false, 'hex'))
       addressLong: createHash(keyPair.getPublic(false, 'hex')).substr(0, 34)
       addressShort: addressShort = base_encode(58, createHash(keyPair.getPublic(false, 'hex')).substr(0, 34))
-      address: 'bolt' + addressShort
+      address: addressShort
     }
 
   createAddresses: (opt = {}) ->
@@ -114,8 +121,8 @@ class Wallet
 
   # sign and add transaction hash
   signTransaction: (transaction) ->
-    if !@isAddressMine(transaction.from)
-      throw new Error 'Cannot sign transactions for other wallets'
+    if transaction.from and !@isAddressMine(transaction.from)
+      throw new Error 'Cannot sign transaction from another wallet'
 
     transaction.publicKey = @publicKey
 
@@ -131,10 +138,11 @@ class Wallet
     transaction
 
   isValidAddress: (address) ->
-    address = address.substr(4) if address.startsWith('bolt')
     /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{22,34}$/.test(address)
 
   isAddressMine: (address) ->
+    log /address/, address
+    log /@getKeyInfo().address/, @getKeyInfo().address
     @getKeyInfo().address is address
 
   getBalance: (includeMempool = false) ->
@@ -155,12 +163,16 @@ class Wallet
 
     return JSON.parse(JSON.stringify(tmp))
 
-Wallet.addressFromPublicKey = (publicKey) -> {
-  addressHash: createHash(publicKey)
-  addressLong: createHash(publicKey).substr(0, 34)
-  addressShort: addressShort = base_encode(58, createHash(publicKey).substr(0, 34))
-  address: 'bolt' + addressShort
-}
+Wallet.addressFromPublicKey = (publicKey) -> (
+  tmp = {
+    addressHash: createHash(publicKey)
+    addressLong: createHash(publicKey).substr(0, 34)
+    addressShort: addressShort = base_encode(58, createHash(publicKey).substr(0, 34))
+    address: addressShort
+  }
+
+  return tmp
+)
 
 module.exports = Wallet
 

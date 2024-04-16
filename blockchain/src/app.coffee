@@ -1,62 +1,68 @@
+# vim: set expandtab tabstop=2 shiftwidth=2 softtabstop=2
 config = require './lib/globals'
 
 express = require 'express'
+
+cors = require 'cors'
 bodyParser = require 'body-parser'
 compression = require 'compression'
-morgan = require 'morgan'
-cors = require 'cors'
+
+middleware = require './lib/middleware'
+coffeeQuery = require './lib/coffeeQuery'
 
 app = express()
 app.disable 'x-powered-by'
 
-# Middleware
 app.use bodyParser.json()
 app.use bodyParser.urlencoded({ extended: true })
-app.use morgan('dev')
 app.use compression()
 app.use cors()
 
-# Create req.options
-app.use ((req, res, next) ->
-  req.options = {}
-  if _.size(req.body)
-    req.options = _.clone(req.body)
-  for k,v of req.query
-    req.options[k] ?= v
-  next()
+app.use middleware.realIp
+app.use middleware.methodOverride
+app.use middleware.metadata
+app.use middleware.respond
+app.use coffeeQuery.parseExtraFilters
+app.use coffeeQuery.middleware
+
+{ modelRouter } = require './lib/autoExpose'
+
+for _k, model of (require './models')
+  continue if !model.EXPOSE
+  try
+    router = modelRouter({ model })
+    app.use model.EXPOSE.route, router
+  catch e
+    throw e
+
+app.get '/', ((req, res, next) ->
+  res.respond {
+    info: version.info()
+    uptime: Math.round(process.uptime())
+  }
 )
 
-# Route files
-blockchainRoutes = require './routes/blockchain'
-transactionsRoutes = require './routes/transactions'
-walletsRoutes = require './routes/wallets'
-miningRoutes = require './routes/mining'
-networkRoutes = require './routes/network'
-statsRoutes = require './routes/stats'
-
-# Setup versioned API
-apiRouterV1 = express.Router()
-
-apiRouterV1.use '/blockchain', blockchainRoutes
-apiRouterV1.use '/transactions', transactionsRoutes
-apiRouterV1.use '/wallets', walletsRoutes
-apiRouterV1.use '/mining', miningRoutes
-apiRouterV1.use '/network', networkRoutes
-apiRouterV1.use '/stats', statsRoutes
-
-apiRouterV1.get '/', ((req, res, next) ->
-  res.json version.info()
-)
-
-app.use '/v1', apiRouterV1
-
-# Handle errors
+# handle errors
 app.use (err, req, res, next) ->
-  console.error err.stack
-  res.status(500).json({ error: 500 })
+  L.error e
+  res.respond err, 500
 
-# Graceful shutdown handling
-# require('process').on 'exit', process.exit
+# handle 404
+app.use (req,res,next) ->
+  doIgnore = false
+
+  for x in [
+    'favicon'
+    'robots.txt'
+  ]
+    if req.url.includes(x)
+      doIgnore = true
+      break
+
+  if !doIgnore
+    L.debug '404', req.method.toLowerCase(), req.url
+
+  return res.respond (new Error '404'), 404
 
 main = (->
   bulk =  require('fs').readFileSync(__dirname + '/../.ascii.art','utf8')
@@ -85,12 +91,17 @@ main = (->
 
   log randomColor(bulk) + '\n'
 
-  L "node address #{identity.address}"
+  L "node identity #{identity.address}"
 
   app.listen config.ports.http, (e) ->
     if e then throw e
     L "http listening on #{config.ports.http}"
 )
 
-main()
+module.exports = {
+  app
+  main
+}
+
+main() if !module.parent
 

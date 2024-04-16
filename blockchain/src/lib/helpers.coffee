@@ -1,4 +1,4 @@
-config = require './globals'
+config = require './../config'
 
 util = require 'util'
 uuid = require 'uuid'
@@ -23,7 +23,7 @@ DERIVATION_DEFAULT = {
 { scrypt } = require('@noble/hashes/scrypt')
 bolthash = require __dirname + '/../../../bolthash/nodejs'
 
-helpers = lib = {
+module.exports = helpers = lib = {
   DERIVATION_DEFAULT
   BASE_ALPHABETS
   BASE_CLIENTS: {}
@@ -127,7 +127,7 @@ lib.createHash = (val, opt = {}) ->
     return lib.createHash(Buffer.from(hashUintArr).toString('hex'), { type: 'sha' })
 
   if opt.type is 'bolthash'
-    return bolthash val
+    return bolthash(val)
 
   throw new Error 'Invalid `opt.type`'
 
@@ -191,26 +191,13 @@ lib.prettyLog = (prefix,x...) ->
   log(prefix.yellow,...x2)
 
 lib.median = (numbers) ->
-  if !numbers? or numbers.length == 0
-    throw new Error("Input array must be non-empty")
+  numbers = (numbers.filter (n) -> n != null).sort (a, b) -> a - b
+  middle = Math.floor numbers.length / 2
 
-  if numbers.length is 1 then return _.first(numbers)
-
-  # Sort the numbers in ascending order
-  sortedNumbers = numbers.slice().sort (a, b) -> a - b
-
-  # Calculate the middle index of the sorted array
-  middleIndex = Math.floor(sortedNumbers.length / 2)
-
-  # If the length of the array is even, return the average of the two middle elements
-  # Otherwise, return the middle element
-  result =
-    if sortedNumbers.length % 2 == 0
-      (sortedNumbers[middleIndex - 1] + sortedNumbers[middleIndex]) / 2
-    else
-      sortedNumbers[middleIndex]
-
-  return result
+  if numbers.length % 2
+    numbers[middle]
+  else
+    (numbers[middle - 1] + numbers[middle]) / 2.0
 
 lib.calculateBlockReward = (blockHeight = 0) ->
   rewardHalvingInterval = config.rewardHalvingInterval
@@ -218,56 +205,46 @@ lib.calculateBlockReward = (blockHeight = 0) ->
   reward = config.rewardDefault / (2 ** halvings)
   return reward
 
-lib.calculateBlockDifficulty = (blockchainId, blockHeight = 0) ->
+lib.calculateBlockDifficulty = (blockHeight = 0) ->
   Block = require './../models/block'
 
-  query = {
-    blockchain: blockchainId
-  }
+  getBlock = (query = null) ->
+    if !query
+      r = await Block.findOne().sort({_id:-1})
+      return r
+    r = await Block.findOne(query)
+    return r
 
-  if blockHeight
-    query['_id'] = {
-      $lte: blockHeight
-    }
-
-  diffBlocks = await Block
-    .find(query,{ ctime: 1, time_elapsed: 1, difficulty: 1 })
-    .sort(_id:-1)
-    .limit(config.difficultyChangeBlockConsideration)
-    .lean()
-
-  if !diffBlocks.length
+  # Check if we should adjust difficulty at this block height
+  if blockHeight < config.difficultyAdjustmentInterval
     return config.difficultyDefault
 
-  currentDifficulty = _.first(diffBlocks)?.difficulty ? config.difficultyDefault
+  if blockHeight % config.difficultyAdjustmentInterval isnt 0
+    lastBlock = await getBlock({_id: blockHeight - 1})
+    return lastBlock.difficulty
 
-  averageElapsed = _.map diffBlocks, (x) -> x.time_elapsed
-  averageElapsed = _.ceil lib.median averageElapsed
+  # Fetch the start and end blocks for the period
+  startBlock = await getBlock({_id: blockHeight - config.difficultyAdjustmentInterval})
+  endBlock = await getBlock({_id: blockHeight - 1})
 
-  if currentDifficulty < config.difficultyDefault
-    currentDifficulty = config.difficultyDefault
+  actualTimespan = endBlock.ctime - startBlock.ctime
+  targetTimespan = config.blockInterval * config.difficultyAdjustmentInterval
 
-  drastic = false
+  # Cap the timespan to prevent extreme difficulty adjustments
+  actualTimespan = Math.max(actualTimespan, targetTimespan / 4)
+  actualTimespan = Math.min(actualTimespan, targetTimespan * 4)
 
-  if averageElapsed < config.blockInterval
-    if averageElapsed < config.blockInterval / 2
-      drastic = true
+  # Calculate new difficulty based on timespan differences
+  newDifficulty = endBlock.difficulty * (targetTimespan / actualTimespan)
+  maxAdjustmentFactor = 4
 
-    if drastic
-      currentDifficulty += (currentDifficulty * (config.difficultyChangePercentDrastic/100))
-    else
-      currentDifficulty += (currentDifficulty * (config.difficultyChangePercent/100))
-  
-  if averageElapsed > config.blockInterval
-    if averageElapsed > config.blockInterval * 2
-      drastic = true
+  # Ensure that difficulty changes are within the allowed range
+  newDifficulty = Math.max(newDifficulty, endBlock.difficulty / maxAdjustmentFactor)
+  newDifficulty = Math.min(newDifficulty, endBlock.difficulty * maxAdjustmentFactor)
 
-    if drastic
-      currentDifficulty -= (currentDifficulty * (config.difficultyChangePercentDrastic/100))
-    else
-      currentDifficulty -= (currentDifficulty * (config.difficultyChangePercent/100))
+  # Round and log the new difficulty
+  newDifficulty = Math.round(newDifficulty)
 
-  return _.ceil(currentDifficulty)
+  return newDifficulty
 
-module.exports = lib
 

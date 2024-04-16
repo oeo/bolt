@@ -15,15 +15,13 @@ ec = new EC('secp256k1')
 Wallet = require './../lib/wallet'
 
 TransactionSchema = new mongoose.Schema({
-
-  blockchain: {
-    type: String
-    ref: 'Blockchain'
-    default: config.versionInt
-  }
-
   to: { type: String, required: true }
   from: { type: String }
+
+  amount: {
+    type: Number,
+    default: 0
+  }
 
   fee: {
     type: Number
@@ -33,11 +31,6 @@ TransactionSchema = new mongoose.Schema({
         if !this.from then return true
         if val < config.minFee then return false
     }
-  }
-
-  amount: {
-    type: Number,
-    default: 0
   }
 
   comment: {
@@ -52,15 +45,16 @@ TransactionSchema = new mongoose.Schema({
   }
 
   hash: { type: String, default: -> @calculateHash() }
-  signature: { type: String, required: true }
-  publicKey: { type: String, required: true }
+
+  publicKey: { type: String }
+  signature: { type: String }
 
 }, { versionKey: false, _id: false, strict: true })
 
 TransactionSchema.methods.calculateHash = ->
   str = _.compact([
-    "#{@from}"
     "#{@to}"
+    "#{@from}"
     "#{@amount}"
     "#{@fee}"
     "#{@comment}"

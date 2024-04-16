@@ -2,18 +2,28 @@
 config = require './../config'
 
 mongoose = require 'mongoose'
+{ EXPOSE } = require './../lib/models'
 
 { Transaction, TransactionSchema } = require './transaction'
 
 merkle = require './../lib/merkle'
-helpers = require './../lib/helpers'
 
 {
   time
+  sleep
   createHash
-  calculateBlockReward
   calculateBlockDifficulty
+  calculateBlockReward
 } = require './../lib/helpers'
+
+modelOpts = {
+  name: 'Block'
+  schema: {
+    versionKey: false
+    collection: 'blocks'
+    strict: true
+  }
+}
 
 BlockSchema = new mongoose.Schema({
 
@@ -23,8 +33,8 @@ BlockSchema = new mongoose.Schema({
   }
 
   blockchain: {
-    type: String
-    ref: 'Blockchain'
+    type: Number
+    required: true
     default: config.versionInt
   }
 
@@ -35,7 +45,6 @@ BlockSchema = new mongoose.Schema({
 
   comment: {
     type: String
-    default: null
   }
 
   hash: {
@@ -58,6 +67,7 @@ BlockSchema = new mongoose.Schema({
   difficulty: {
     type: Number
     min: 1
+    default: config.difficultyDefault
     required: true
   }
 
@@ -77,7 +87,7 @@ BlockSchema = new mongoose.Schema({
     default: -> time()
   }
 
-}, { versionKey: false, strict: true })
+}, modelOpts.schema)
 
 maxTarget = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF')
 getTargetForDifficulty = (difficulty) -> maxTarget / BigInt(difficulty)
@@ -91,10 +101,7 @@ BlockSchema.pre 'save', ((next) ->
 
   _time = time()
 
-  lastBlock = await Block
-    .findOne({ blockchain: @blockchain })
-    .sort({ _id: -1 })
-
+  lastBlock = await @constructor.findOne(_id: @_id - 1)
   @time_elapsed = @ctime - lastBlock?.ctime ? 0
 
   return next()
@@ -103,19 +110,10 @@ BlockSchema.pre 'save', ((next) ->
 BlockSchema.post 'save', (doc) ->
   eve.emit 'block_solved', {
     height: doc._id
-    blockchain: doc.blockchain
   }
 
-  await mongoose.model('Blockchain')
-    .updateOne { _id: doc.blockchain }
-    .set {
-      height: doc._id
-      difficulty: doc.difficulty
-      time_last_block: doc.ctime
-    }
-
 # calculate block hash 
-BlockSchema.methods.calculateHash = (returnString = false) ->
+BlockSchema.methods.calculateHash = ->
   str = _.compact([
     "#{@_id}"
     "#{@blockchain}"
@@ -134,51 +132,65 @@ BlockSchema.methods.calculateHash = (returnString = false) ->
   return { hashStr, hashBigInt }
 
 BlockSchema.methods.calculateBlockDifficulty = (height = 0) ->
-  return await calculateBlockDifficulty(@blockchain, height)
+  return await calculateBlockDifficulty(height)
 
 BlockSchema.methods.calculateBlockReward = (height = 0) ->
   return await calculateBlockReward(height)
 
-# validation
-BlockSchema.methods.isValid = ->
+BlockSchema.methods.isValid = (opt = {}) ->
   try
-    await @tryValidate()
+    await @tryValidate(opt)
     return true
   catch e
     return false
 
-BlockSchema.methods.tryValidate = ->
+BlockSchema.methods.tryValidate = (opt = {}) ->
 
-  # Get last block
-  lastBlock = await Block
-    .findOne({ blockchain: @blockchain })
-    .sort({ _id: -1 })
+  # validate genesis block
+  if @_id is 0
+    if @hash isnt config.genesisBlock.hash
+      throw new Error '`hash` invalid for genesis block'
+    if @hash_previous isnt config.genesisBlock.hash_previous
+      throw new Error '`hash_previous` invalid for genesis block'
+    if @difficulty isnt config.genesisBlock.difficulty
+      throw new Error '`difficulty` invalid for genesis block'
+    
+    # Genesis block is valid
+    return true
 
-  if lastBlock
+  # validate the block against the previous block
+  if opt.prevBlock
+    prevBlock = opt.prevBlock
+  else
+    prevBlock = await @constructor.findOne(_id: @_id - 1)
 
-    # Check last block hash
-    if @hash_previous isnt lastBlock.hash
-      throw new Error '`hash_previous` invalid'
+  if !prevBlock
+    throw new Error 'previous block not found'
 
-    # Check block height
-    if @_id isnt lastBlock._id + 1
-      throw new Error '`_id` (block height) invalid'
+  # check hash match
+  if @hash_previous isnt prevBlock.hash
+    throw new Error '`hash_previous` invalid'
 
-  # Check hash 
+  # recalculate the hash
   target = getTargetForDifficulty(@difficulty)
   { hashStr, hashBigInt } = await @calculateHash()
 
   if hashStr isnt @hash
     throw new Error '`hash` invalid'
 
+  # make sure the merkle hash matches
+  if @hash_merkle isnt merkle(@transactions)
+    throw new Error '`hash_merkle` is invalid'
+
+  # check difficulty
   hashValid = hashBigInt < target
 
   if !hashValid
     throw new Error('`hashBigInt` invalid (too small)')
 
-  # Check difficulty 
-  if @difficulty isnt (await calculateBlockDifficulty(@blockchain, @_id))
-    throw new Error '`difficulty` invalid'
+  # ensure the difficulty is correct
+  if @difficulty isnt (cdifficulty = await calculateBlockDifficulty(@_id))
+    throw new Error "`difficulty` invalid: (difficulty=#{@difficulty}, cdifficulty=#{cdifficulty})"
 
   # Check reward transactions
   if @transactions.length
@@ -192,11 +204,7 @@ BlockSchema.methods.tryValidate = ->
     if rewardItem.amount isnt (await calculateBlockReward(@_id))
       throw new Error '`minerReward` invalid'
 
-  # Check merkle
-  if @hash_merkle isnt merkle(@transactions)
-    throw new Error '`hash_merkle` is invalid'
-
-  # Block is valid 
+  # valid block 
   return true
 
 # Local mining function
@@ -208,7 +216,7 @@ BlockSchema.methods.mine = ->
 
   cancelMining = new Promise (resolve) =>
     eve.once 'block_solved', (data) =>
-      if data.height is _height and data.blockchain is _blockchain
+      if data.height is _height
         miningCanceled = true
         resolve()
 
@@ -227,12 +235,12 @@ BlockSchema.methods.mine = ->
         else
           @nonce = @nonce + 1
 
-      await Promise.race([helpers.sleep(50), cancelMining])
+      await Promise.race([sleep(50), cancelMining])
 
     return null
 
   return _mine()
 
-Block = mongoose.model 'Block', BlockSchema
-module.exports = Block
+model = mongoose.model modelOpts.name, BlockSchema
+module.exports = EXPOSE(model)
 

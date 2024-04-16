@@ -11,6 +11,18 @@ config = {
 
   staging: false
 
+  storage: {
+    mongo: 'mongodb://127.0.0.1:27017/' + vers.info().prefixMongo
+    redis: 'redis://127.0.0.1:6379/0'
+    redisPrefix: vers.info().prefixRedis
+    mongoPrefix: vers.info().prefixMongo
+  }
+
+  ports: {
+    ws: 9443
+    http: 9442
+  }
+
   algo: 'scrypt' # ex: [sha256, scrypt, bolthash]
 
   minFee: 0.001
@@ -20,32 +32,21 @@ config = {
   maxTransactionCommentSize: 32
   maxBlockCommentSize: 32
   maxContractCommentSize: 32
+
   rewardDefault: 50
-  rewardHalvingInterval: 210000 # blocks
-  blockInterval: 60 * 60 # 1hr 
-  difficultyDefault: 100
-  difficultyChangePercent: 1
-  difficultyChangePercentDrastic: 25
-  difficultyChangeBlockConsideration: 3
-  confirmations: 6
+  rewardHalvingInterval: (210000 / 2) # blocks
 
-  storage: {
-    mongo: 'mongodb://127.0.0.1:27017/' + vers.info().prefixMongo
-    redis: 'redis://127.0.0.1:6379/0'
-    redisPrefix: vers.info().prefixRedis
-    mongoPrefix: vers.info().prefixMongo
-  }
+  maxSupply: 21 * 1000000
+  blockInterval: (60 * 5) # 5 mins
 
-  ports: {
-    ws: 12121
-    http: 12120
-  }
+  difficultyDefault: 10
+  difficultyAdjustmentInterval: (2016 / 2) # blocks
 }
 
 configStaging = {
   staging: true
-  blockInterval: 10 # 10 seconds
-  rewardHalvingInterval: 50 # 50 blocks
+  blockInterval: 30 # seconds
+  difficultyAdjustmentInterval: 5
 }
 
 if vers.info().staging or env.STAGING
@@ -53,9 +54,14 @@ if vers.info().staging or env.STAGING
 
 config.genesisBlock = {
   _id: 0
+  blockchain: config.versionInt
   transactions: []
   hash_previous: '0000000000000000000000000000000000000000000000000000000000000000'
+  hash_merkle: ''
   difficulty: config.difficultyDefault
+  nonce: 0
+  hash: '0000000000000000000000000000000000000000000000000000000000000000'
+  ctime: 0
   comment: 'we will craft citadels in the clouds or bury vaults within the ashes.'
 }
 

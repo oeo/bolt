@@ -20,7 +20,7 @@ do =>
   await mongoose.connect config.storage.mongo
 
 Redis = require 'ioredis'
-global.redis = new Redis(config.storage.redis)
+global.redis ?= new Redis(config.storage.redis)
 
 reve = require './redis-events'
 global.eve ?= new reve(config.storage.redis)

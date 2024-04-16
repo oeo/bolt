@@ -23,10 +23,6 @@ if !allDbs?.length
 
 L.warn 'mongo databases found to drop', (_.map allDbs, (x) -> x.name.trim()).join ' '
 
-if !(answer = await helpers.confirm 'are you sure you want to drop these databases?', 'Y')
-  L.error 'user aborted script'
-  exit 1
-
 # drop mongo collections
 for db in allDbs
   options = {}

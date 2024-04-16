@@ -3,20 +3,17 @@ config = require './../lib/globals'
 { time } = require './../lib/helpers'
 
 Wallet = require './../lib/wallet'
-Blockchain = require './../lib/blockchain'
 
 Block = require './../models/block'
+Blockchain = require './../models/blockchain'
+
 { Transaction } = require './../models/transaction'
 
 # connect to chain
 L 'syncing chain data'
 
-blockchain = new Blockchain({
-  config: config
-})
-
-await blockchain.init()
-await blockchain.validate()
+blockchain = new Blockchain()
+await blockchain.sync()
 
 # load wallets
 wallets = {}
@@ -29,7 +26,8 @@ for item in walletJSON
   wallets[item.name] = new Wallet({ privateKey: item.privateKey })
   wallets[item.name].use(blockchain)
 
-L.success "loaded #{_.size(wallets)} wallets"
+L wallets
+L "loaded #{_.size(wallets)} wallets to use for this mining session"
 
 # mine blocks
 while 1
@@ -75,8 +73,7 @@ while 1
     })
 
     if blockReward
-      L """
+      L.success """
           reward for ##{nextBlock._id} sent to #{blockReward.to} (#{blockReward.amount} bolt)
       """
-###
 
