@@ -5,6 +5,7 @@ config = require './../config'
 { Transaction } = require './../models/transaction'
 
 class Mempool
+
   constructor: (blockchainId) ->
     @client = new Redis(config.storage.redis)
 
@@ -30,8 +31,9 @@ class Mempool
   # Retrieve transactions from the mempool in sorted order (highest fee first)
   getTransactions: (limit = 10) ->
     transactionIds = await @client.zrevrange @key, 0, limit - 1
-    
+
     transactions = []
+
     for transactionId in transactionIds
       transactionData = await @client.hgetall @prefix + ':' + transactionId
       transaction = new Transaction(transactionData)
@@ -57,14 +59,14 @@ class Mempool
   # Retrieve the highest fee transactions that fit within the max block size
   getHighestFeeTransactions: (limit, maxSize) ->
     transactionIds = await @client.zrevrange @key, 0, -1
-    
+
     transactions = []
     currentSize = 0
-    
+
     for transactionId in transactionIds
       transactionData = await @client.hgetall @prefix + ':' + transactionId
       transaction = new Transaction(transactionData)
-      
+
       if transaction.isValid()
         transactionSize = JSON.stringify(transaction).length
         if currentSize + transactionSize <= maxSize and transactions.length < limit
@@ -72,13 +74,13 @@ class Mempool
           currentSize += transactionSize
         else
           break
-    
+
     return transactions
 
   # Retrieve all pending transactions from the mempool
   getPendingTransactions: ->
     transactionIds = await @client.zrange @key, 0, -1
-    
+
     transactions = []
 
     for transactionId in transactionIds

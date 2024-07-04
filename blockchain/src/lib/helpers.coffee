@@ -224,7 +224,8 @@ lib.calculateBlockDifficulty = (blockHeight = 0) ->
     return lastBlock.difficulty
 
   # Fetch the start and end blocks for the period
-  startBlock = await getBlock({_id: blockHeight - config.difficultyAdjustmentInterval})
+  startBlockHeight = Math.max(blockHeight - config.difficultyAdjustmentInterval, 1)
+  startBlock = await getBlock({_id: startBlockHeight})
   endBlock = await getBlock({_id: blockHeight - 1})
 
   actualTimespan = endBlock.ctime - startBlock.ctime
@@ -246,5 +247,4 @@ lib.calculateBlockDifficulty = (blockHeight = 0) ->
   newDifficulty = Math.round(newDifficulty)
 
   return newDifficulty
-
 

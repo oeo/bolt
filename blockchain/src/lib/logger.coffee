@@ -25,6 +25,8 @@ getCallerFile = () ->
   stack[2]?.getFileName()
 
 L = (args...) ->
+  if process.env.TESTING then return
+
   callerFile = getCallerFile()
   scope = callerFile.split('/').pop()
   logger = new Signale({ scope, config: signaleConfig })

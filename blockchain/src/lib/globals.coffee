@@ -14,17 +14,18 @@ global._ ?= require 'lodash'
 
 global.version = (require './version.coffee')
 
-global.mongoose ?= require 'mongoose'
+if !global.mongoose
+  global.mongoose ?= require 'mongoose'
+  mongoose.connect config.storage.mongo
 
-do =>
-  await mongoose.connect config.storage.mongo
+if !global.redis
+  Redis = require 'ioredis'
+  global.redis ?= new Redis(config.storage.redis)
 
-Redis = require 'ioredis'
-global.redis ?= new Redis(config.storage.redis)
-
-reve = require './redis-events'
-global.eve ?= new reve(config.storage.redis)
+if !global.eve
+  reve = require './redis-events'
+  global.eve ?= new reve(config.storage.redis)
 
 # node identity
-global.identity = (require './identity.coffee')
+global.identity ?= (require './identity.coffee')
 

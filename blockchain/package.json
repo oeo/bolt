@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon ./src/app.coffee",
-    "test": "echo NO_TESTS"
+    "test": "mocha --require coffeescript/register src/tests/*.test.coffee"
   },
   "nodemonConfig": {
     "watch": [
@@ -47,6 +47,7 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "mocha": "^10.6.0",
     "nodemon": "^3.1.0"
   }
 }

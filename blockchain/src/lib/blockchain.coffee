@@ -22,7 +22,7 @@ class Blockchain
     @_id = config.versionInt
 
   init: ->
-    genesisExists = await Block.findOne(_id:0)
+    genesisExists = await Block.findOne(_id: 0)
 
     if !genesisExists
       L 'creating genesis block', config.genesisBlock
@@ -96,7 +96,7 @@ class Blockchain
     block = await Block.findOne(_id: height)
     block
 
-  getTransactionsByAddress: (address) ->
+  getTransactionsByAddress: (address, opt = {}) ->
     blocks = await Block.find(
       $or: [
         { 'transactions.from': address }

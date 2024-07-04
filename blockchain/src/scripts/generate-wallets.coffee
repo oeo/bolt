@@ -31,3 +31,4 @@ for x in names
 
 log JSON.stringify(wallets,null,2)
 exit 0
+

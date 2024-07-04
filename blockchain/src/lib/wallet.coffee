@@ -141,15 +141,13 @@ class Wallet
     /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{22,34}$/.test(address)
 
   isAddressMine: (address) ->
-    log /address/, address
-    log /@getKeyInfo().address/, @getKeyInfo().address
     @getKeyInfo().address is address
 
   getBalance: (includeMempool = false) ->
     if !@_blockchain
       throw new Error 'Not connected to a chain, use `wallet.use(blockchain)`'
 
-    result = await @_blockchain.addressBalance(@address, { includeMempool })
+    result = await @_blockchain.getBalance(@address, { includeMempool })
     return result
 
   toJSON: ->

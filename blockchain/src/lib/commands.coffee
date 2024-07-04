@@ -13,7 +13,7 @@ module.exports.register = (commander) ->
     config: commander.command('config')
   }
 
-  # blockchain 
+  # blockchain
   commands.chain
     .command('info')
     .description('get info about the blockchain')
