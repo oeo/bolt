@@ -18,7 +18,8 @@ are rewarded in bolt for solving blocks, the native currency of the chain.
 │       │   └── peernode
 │       ├── models
 │       ├── routes
-│       └── scripts
+│       ├── scripts
+│       └── tests
 ├── bolthash
 │   ├── cli
 │   │   └── src
@@ -37,7 +38,7 @@ are rewarded in bolt for solving blocks, the native currency of the chain.
 
 ### peer discovery
 
-this project uses the [libp2p](https://libp2p.io/) library for peer-to-peer 
+this project uses the [libp2p](https://libp2p.io/) library for peer-to-peer
 communication and peer discovery.
 
 the main components involved in peer discovery are:
@@ -56,35 +57,38 @@ when a new node is started, it performs the following steps for peer discovery:
 1. gossips about known peers and their subscribed topics to help other nodes discover and connect to them.
 
 ### fair distribution
-when mainnet is launched anyone interested will be able to run a node and 
+when mainnet is launched anyone interested will be able to run a node and
 begin mining blocks and will be eligible for the block subsidy reward.
 
 there will be no preallocated tokens of any kind, no airdrop of any kind,
 and no fundraising or premine of any kind.
 
 ### @todo
-- [x] enforce bolthash to produce sha256 like hex only outputs with same len
-  - [x] rebuild node module and test
-  - [x] rebuild cli tool and test
-  - [ ] fix webasm export
+- [x] add mocha test runners
 - [x] give node an automatic wallet/keypair in `$HOME/.bolt/identity.json`
-- [ ] implement mempool (redis)
+- [ ] implement redis mempool
 - [ ] implement trailing balance indexing (redis)
-  - this should sit N blocks behind the current block height and contain a redis snapshot of wallet balances
-- [x] finalize transaction signing and validation
-- [x] finalize block validation
+  - this should sit n blocks behind the current block height and contain a redis snapshot of wallet balances
 - [ ] p2p
   - [ ] standardize message format
-  - [ ] add a p2p chat for node runners (fun!)
+  - [ ] add a p2p chat for node runners
   - [ ] p2p discovery
     - [x] utilize ipfs pubsub implementation
     - [x] lift the libp2p logic and write as service or wrap ipfs itself
 - [ ] create minimal block and mempool explorer
 - [ ] create standalone miner in rust using block templating
-- [ ] create standalone wallet (electron?/web?/browserext?)
+- [ ] create standalone wallet
+  1. [ ] web
+  1. [ ] browser extension
 - [ ] dockerize node setup
+- [x] finalize transaction signing and validation
+- [x] finalize block validation
+- [x] enforce bolthash to produce sha256 like hex only outputs with same len
+  - [x] rebuild node module and test
+  - [x] rebuild cli tool and test
+  - [ ] fix webasm export
 
-### @eventual
+### @eventuals
 - rust-based v8 smart contract executor
   - allows newcomers to write in a familiar syntax while maintaining strict execution and computation limits for miners
   - highly performant and circumvents nodejs' single-threaded nature
